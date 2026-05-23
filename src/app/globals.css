@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+:root {
+  --background: #333e3d;
+  --foreground: #f4f1eb;
+  --surface: #293231;
+  --muted: #9a9d9d;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+a,
+input,
+select,
+textarea,
+summary {
+  outline-color: #f4f1eb;
+  outline-offset: 3px;
+}
+
+button,
+summary {
+  cursor: pointer;
+}
+
+::selection {
+  background: #f4f1eb;
+  color: #202827;
+}
+
+@layer components {
+  .input {
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 1px solid rgb(255 255 255 / 0.14);
+    background: #333e3d;
+    padding: 0.625rem 0.75rem;
+    color: #f4f1eb;
+    transition:
+      border-color 150ms ease,
+      background-color 150ms ease;
+  }
+
+  .input::placeholder {
+    color: rgb(154 157 157 / 0.8);
+  }
+
+  .input:focus {
+    border-color: rgb(244 241 235 / 0.58);
+    background: #303938;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    border: 1px solid rgb(255 255 255 / 0.15);
+    padding: 0 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #f4f1eb;
+    transition: background-color 150ms ease;
+  }
+
+  .nav-button:hover {
+    background: rgb(255 255 255 / 0.06);
+  }
+
+  .entity-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: #333e3d;
+    padding: 0.75rem;
+  }
+}

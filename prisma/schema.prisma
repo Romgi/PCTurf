@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id           String          @id @default(cuid())
+  name         String          @unique
+  description  String?
+  accentColor  String          @default("#9a9d9d")
+  displayOrder Int             @default(0)
+  active       Boolean         @default(true)
+  employees    Employee[]
+  assignments  Assignment[]
+  jobTemplates JobTemplate[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model Employee {
+  id           String       @id @default(cuid())
+  name         String
+  title        String?
+  radio        String?
+  categoryId   String?
+  category     Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  active       Boolean      @default(true)
+  displayOrder Int          @default(0)
+  assignments  Assignment[]
+  absences     Absence[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([active, displayOrder])
+}
+
+model DailyPlan {
+  id          String       @id @default(cuid())
+  date        String       @unique
+  notes       String?
+  weather     String?
+  assignments Assignment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model JobTemplate {
+  id               String    @id @default(cuid())
+  title            String
+  details          String?
+  location         String?
+  defaultStartTime String?
+  estimatedMinutes Int?
+  active           Boolean   @default(true)
+  displayOrder     Int       @default(0)
+  categoryId       String
+  category         Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([active, displayOrder])
+}
+
+model Assignment {
+  id         String             @id @default(cuid())
+  planId     String
+  employeeId String
+  categoryId String
+  title      String
+  details    String?
+  location   String?
+  startTime  String?
+  priority   String             @default("NORMAL")
+  status     String             @default("PLANNED")
+  sortOrder  Int                @default(0)
+  plan       DailyPlan          @relation(fields: [planId], references: [id], onDelete: Cascade)
+  employee   Employee           @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  category   Category           @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@index([planId, categoryId, sortOrder])
+  @@index([employeeId, planId])
+}
+
+model Absence {
+  id         String   @id @default(cuid())
+  employeeId String
+  date       String
+  reason     String?
+  notes      String?
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([employeeId, date])
+  @@index([date])
+  @@index([employeeId, date])
+}
