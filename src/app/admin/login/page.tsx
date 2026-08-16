@@ -24,7 +24,7 @@ export default async function LoginPage() {
           <Image src="/pc-logo.png" alt="Port Carling Golf Club" width={104} height={121} priority className="h-24 w-auto" />
           <p className="mt-5 text-xs uppercase tracking-[0.28em] text-[#9a9d9d]">Turf operations</p>
           <h1 className="mt-2 text-2xl font-semibold">Superintendent login</h1>
-          <p className="mt-2 text-sm leading-6 text-[#9a9d9d]">Sign in to manage employees, categories, saved jobs, absences, and daily assignments.</p>
+          <p className="mt-2 text-sm leading-6 text-[#9a9d9d]">Sign in to manage employees, daily assignments, board notes, and future work days.</p>
         </div>
         <LoginForm />
         <Link href="/" className="mt-5 inline-flex text-sm font-semibold text-[#f4f1eb] hover:underline">

@@ -8,7 +8,9 @@ type SubmitButtonProps = {
   children: React.ReactNode;
   className?: string;
   confirmMessage?: string;
+  name?: string;
   pendingText?: string;
+  value?: string;
   variant?: "primary" | "secondary" | "danger" | "ghost";
 };
 
@@ -23,7 +25,9 @@ export function SubmitButton({
   children,
   className,
   confirmMessage,
+  name,
   pendingText = "Saving",
+  value,
   variant = "primary",
 }: SubmitButtonProps) {
   const { pending } = useFormStatus();
@@ -32,6 +36,7 @@ export function SubmitButton({
     <button
       type="submit"
       disabled={pending}
+      name={name}
       onClick={(event) => {
         if (confirmMessage && !window.confirm(confirmMessage)) {
           event.preventDefault();
@@ -42,6 +47,7 @@ export function SubmitButton({
         variants[variant],
         className,
       )}
+      value={value}
     >
       {pending ? pendingText : children}
     </button>

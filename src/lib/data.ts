@@ -1,7 +1,7 @@
 import "server-only";
 
 import { prisma } from "@/lib/db";
-import { getTodayKey, normalizeDateKey } from "@/lib/dates";
+import { normalizeDateKey } from "@/lib/dates";
 import { getPortCarlingWeather } from "@/lib/weather";
 
 export async function ensureDailyPlan(dateInput?: string | null) {
@@ -18,95 +18,114 @@ export async function getBoardData(dateInput?: string | null) {
   const date = normalizeDateKey(dateInput);
   const plan = await ensureDailyPlan(date);
 
-  const [categories, employees, assignments, absences, weatherReport] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
-    }),
+  const [employees, assignments, weatherReport] = await Promise.all([
     prisma.employee.findMany({
       where: { active: true },
-      include: { category: true },
       orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
     }),
     prisma.assignment.findMany({
       where: { planId: plan.id },
-      include: { employee: true, category: true },
-      orderBy: [{ employee: { displayOrder: "asc" } }, { createdAt: "asc" }],
-    }),
-    prisma.absence.findMany({
-      where: { date },
-      include: { employee: { include: { category: true } } },
+      include: { employee: true },
       orderBy: [{ employee: { displayOrder: "asc" } }, { employee: { name: "asc" } }],
     }),
     getPortCarlingWeather(date),
   ]);
 
-  const assignedEmployeeIds = new Set(assignments.map((assignment) => assignment.employeeId));
-  const absentEmployeeIds = new Set(absences.map((absence) => absence.employeeId));
-  const activeCategoryIds = new Set(categories.filter((category) => category.active).map((category) => category.id));
-  const assignedCategoryIds = new Set(assignments.map((assignment) => assignment.categoryId));
-  const presentEmployees = employees.filter((employee) => !absentEmployeeIds.has(employee.id));
-  const employeeAssignments = presentEmployees.map((employee) => ({
+  const assignmentsByEmployee = new Map(
+    assignments.map((assignment) => [assignment.employeeId, assignment]),
+  );
+  const employeeAssignments = employees.map((employee) => ({
     employee,
-    assignments: assignments.filter((assignment) => assignment.employeeId === employee.id),
+    assignment: assignmentsByEmployee.get(employee.id) ?? null,
   }));
-  const boardCategories = categories
-    .filter((category) => category.active || assignedCategoryIds.has(category.id))
-    .map((category) => ({
-      ...category,
-      assignments: assignments.filter((assignment) => assignment.categoryId === category.id),
-    }))
-    .filter((category) => category.assignments.length > 0 || activeCategoryIds.has(category.id));
 
   return {
     date,
     plan,
-    categories: boardCategories,
     assignments,
     employees,
-    absences,
-    absentEmployeeIds: Array.from(absentEmployeeIds),
     employeeAssignments,
     weatherReport,
-    unassignedEmployees: presentEmployees.filter((employee) => !assignedEmployeeIds.has(employee.id)),
+    unassignedEmployees: employees.filter((employee) => !assignmentsByEmployee.has(employee.id)),
   };
 }
 
 export type BoardData = Awaited<ReturnType<typeof getBoardData>>;
 
+type RankedJob = {
+  count: number;
+  title: string;
+};
+
+function recordJob(target: Map<string, RankedJob>, title: string) {
+  const cleanedTitle = title.trim();
+  if (!cleanedTitle) return;
+
+  const key = cleanedTitle.toLocaleLowerCase();
+  const existing = target.get(key);
+
+  if (existing) {
+    existing.count += 1;
+  } else {
+    target.set(key, { count: 1, title: cleanedTitle });
+  }
+}
+
+function rankJobs(jobs: Map<string, RankedJob>, limit?: number) {
+  const ranked = Array.from(jobs.values())
+    .sort((left, right) => right.count - left.count || left.title.localeCompare(right.title))
+    .map((job) => job.title);
+
+  return typeof limit === "number" ? ranked.slice(0, limit) : ranked;
+}
+
 export async function getDashboardData(dateInput?: string | null) {
   const board = await getBoardData(dateInput);
-
-  const [employees, categories, templates, recentPlans, upcomingAbsences] = await Promise.all([
+  const [allEmployees, recentPlans, assignmentHistory] = await Promise.all([
     prisma.employee.findMany({
-      include: { category: true },
       orderBy: [{ active: "desc" }, { displayOrder: "asc" }, { name: "asc" }],
-    }),
-    prisma.category.findMany({
-      orderBy: [{ active: "desc" }, { displayOrder: "asc" }, { name: "asc" }],
-    }),
-    prisma.jobTemplate.findMany({
-      include: { category: true },
-      orderBy: [{ active: "desc" }, { displayOrder: "asc" }, { title: "asc" }],
     }),
     prisma.dailyPlan.findMany({
       orderBy: { date: "desc" },
       take: 12,
     }),
-    prisma.absence.findMany({
-      where: { date: { gte: getTodayKey() } },
-      include: { employee: { include: { category: true } } },
-      orderBy: [{ date: "asc" }, { employee: { displayOrder: "asc" } }],
-      take: 20,
+    prisma.assignment.findMany({
+      select: { employeeId: true, title: true },
+      orderBy: { updatedAt: "desc" },
+      take: 5000,
     }),
   ]);
 
+  const globalJobs = new Map<string, RankedJob>();
+  const jobsByEmployee = new Map<string, Map<string, RankedJob>>();
+
+  for (const assignment of assignmentHistory) {
+    recordJob(globalJobs, assignment.title);
+
+    const employeeJobs = jobsByEmployee.get(assignment.employeeId) ?? new Map<string, RankedJob>();
+    recordJob(employeeJobs, assignment.title);
+    jobsByEmployee.set(assignment.employeeId, employeeJobs);
+  }
+
+  const allSuggestions = rankJobs(globalJobs);
+  if (!allSuggestions.some((suggestion) => suggestion.toLocaleLowerCase() === "absent")) {
+    allSuggestions.unshift("Absent");
+  }
+
   return {
     ...board,
-    allEmployees: employees,
-    allCategories: categories,
-    templates,
+    allEmployees,
     recentPlans,
-    upcomingAbsences,
+    allSuggestions,
+    assignmentRows: board.employeeAssignments.map(({ employee, assignment }) => ({
+      employee: {
+        id: employee.id,
+        name: employee.name,
+        title: employee.title,
+      },
+      assignmentTitle: assignment?.title ?? "",
+      commonJobs: rankJobs(jobsByEmployee.get(employee.id) ?? new Map(), 5),
+    })),
   };
 }
 
