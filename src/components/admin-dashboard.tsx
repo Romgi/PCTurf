@@ -5,17 +5,24 @@ import {
   ChevronRight,
   ClipboardList,
   CloudSun,
+  Database,
+  KeyRound,
   LogOut,
   MonitorUp,
   Plus,
+  Trash2,
   Users,
 } from "lucide-react";
 
+import { AdminAccountForm } from "@/components/admin-account-form";
 import { AssignmentRoster } from "@/components/assignment-roster";
 import { BrandLockup } from "@/components/brand-lockup";
 import { SubmitButton } from "@/components/submit-button";
 import {
+  clearAllDataAction,
+  clearEmployeesAction,
   createEmployeeAction,
+  deleteAdminAction,
   deleteEmployeeAction,
   logoutAction,
   toggleEmployeeAction,
@@ -33,6 +40,7 @@ import { cn } from "@/lib/ui";
 
 type AdminDashboardProps = {
   admin: {
+    id: string;
     name: string;
     email: string;
   };
@@ -129,6 +137,7 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
       </div>
 
       <EmployeeManager data={data} />
+      <SystemAdministration currentAdminId={admin.id} data={data} />
 
       <footer className="mx-auto mt-8 max-w-[1680px] border-t border-white/10 pt-4 text-xs text-[#9a9d9d]">
         Signed in as {admin.name} ({admin.email})
@@ -319,5 +328,122 @@ function EmployeeManager({ data }: { data: DashboardData }) {
         ))}
       </div>
     </section>
+  );
+}
+
+function SystemAdministration({ currentAdminId, data }: { currentAdminId: string; data: DashboardData }) {
+  return (
+    <section className="mx-auto mt-5 max-w-[1680px] border-t border-white/15 pt-6">
+      <div className="flex items-center gap-3">
+        <KeyRound className="h-5 w-5 text-[#9a9d9d]" />
+        <div>
+          <h2 className="text-xl font-semibold">System administration</h2>
+          <p className="text-sm text-[#9a9d9d]">Manage administrator access and permanent data cleanup.</p>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
+        <section className="rounded-md border border-white/12 bg-[#293231] p-5">
+          <h3 className="text-lg font-semibold">Administrator access</h3>
+          <p className="mt-1 text-sm text-[#9a9d9d]">Add another superintendent or remove an account that should no longer have access.</p>
+          <div className="mt-5 border-y border-white/10 py-5">
+            <AdminAccountForm />
+          </div>
+          <div className="mt-4 grid gap-2">
+            {data.allAdmins.map((account, index) => (
+              <div
+                className={cn(
+                  "flex flex-col gap-3 rounded-md border border-white/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between",
+                  index % 2 === 0 ? "bg-[#333e3d]" : "bg-[#303938]",
+                )}
+                key={account.id}
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{account.name}</p>
+                  <p className="truncate text-sm text-[#9a9d9d]">{account.email}</p>
+                </div>
+                {account.id === currentAdminId ? (
+                  <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a9d9d]">Current account</span>
+                ) : (
+                  <form action={deleteAdminAction}>
+                    <input name="id" type="hidden" value={account.id} />
+                    <SubmitButton
+                      confirmMessage={`Remove administrator access for ${account.email}?`}
+                      variant="danger"
+                    >
+                      Remove access
+                    </SubmitButton>
+                  </form>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-md border border-red-300/20 bg-[#293231] p-5">
+          <div className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-red-200" />
+            <h3 className="text-lg font-semibold">Data cleanup</h3>
+          </div>
+          <p className="mt-1 text-sm leading-6 text-[#9a9d9d]">These actions are permanent. Type the displayed phrase and confirm the browser warning to continue.</p>
+          <div className="mt-5 grid gap-4">
+            <ResetControl
+              action={clearEmployeesAction}
+              description="Deletes every employee and all assignment history attached to them. Board notes and administrators remain."
+              phrase="CLEAR EMPLOYEES"
+              title="Clear all employees"
+            />
+            <ResetControl
+              action={clearAllDataAction}
+              description="Deletes employees, assignments, dates, notes, legacy job data, and all additional administrators. Your current login is preserved to prevent lockout."
+              phrase="CLEAR ALL DATA"
+              title="Clear all data"
+            />
+          </div>
+        </section>
+      </div>
+    </section>
+  );
+}
+
+function ResetControl({
+  action,
+  description,
+  phrase,
+  title,
+}: {
+  action: (formData: FormData) => Promise<void>;
+  description: string;
+  phrase: string;
+  title: string;
+}) {
+  return (
+    <form action={action} className="rounded-md border border-white/10 bg-[#333e3d] p-4">
+      <div className="flex items-start gap-3">
+        <Trash2 className="mt-0.5 h-4 w-4 shrink-0 text-red-200" />
+        <div>
+          <h4 className="font-semibold">{title}</h4>
+          <p className="mt-1 text-sm leading-6 text-[#9a9d9d]">{description}</p>
+        </div>
+      </div>
+      <label className="mt-3 grid gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#9a9d9d]">
+        Type &quot;{phrase}&quot;
+        <input
+          autoComplete="off"
+          className="input normal-case tracking-normal"
+          name="confirmation"
+          pattern={phrase}
+          required
+        />
+      </label>
+      <SubmitButton
+        className="mt-3"
+        confirmMessage={`${title}? This cannot be undone.`}
+        pendingText="Clearing"
+        variant="danger"
+      >
+        {title}
+      </SubmitButton>
+    </form>
   );
 }

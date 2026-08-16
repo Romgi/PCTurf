@@ -113,7 +113,7 @@ function StandardBoard({
 
 function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscreen: boolean }) {
   const report = data.weatherReport;
-  const weatherDetails = [report.temperature, report.highLow, report.wind, report.precipitation].filter(Boolean);
+  const secondaryWeatherDetails = [report.highLow, report.wind, report.humidity].filter(Boolean);
   const totalEmployees = data.employeeAssignments.length;
   const columns = totalEmployees <= 12 ? 1 : totalEmployees <= 26 ? 2 : 3;
   const rowsPerColumn = Math.max(1, Math.ceil(totalEmployees / columns));
@@ -136,16 +136,20 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
         </div>
       </header>
 
-      <section className="my-2 grid shrink-0 gap-1.5 lg:grid-cols-[1.45fr_1fr_auto]">
+      <section className="my-2 grid shrink-0 grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)_auto] gap-1.5">
         <div className="flex min-h-20 min-w-0 items-center gap-4 rounded-md border border-white/12 bg-[#293231] px-4 py-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-white/12 bg-[#333e3d]">
             <PresentWeatherIcon summary={report.summary} />
           </div>
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-[0.18em] text-[#9a9d9d]">{report.label}</p>
-            <p className="mt-1 truncate text-lg font-semibold leading-none">{report.summary}</p>
-            {weatherDetails.length > 0 ? (
-              <p className="mt-1.5 truncate text-xs font-medium text-[#d8dad7]">{weatherDetails.join(" / ")}</p>
+            <div className="mt-1 flex min-w-0 items-baseline gap-3">
+              <p className="shrink-0 truncate text-xl font-semibold leading-none">{report.summary}</p>
+              {report.temperature ? <p className="truncate text-lg font-semibold leading-none">{report.temperature}</p> : null}
+              {report.precipitation ? <p className="truncate text-lg font-semibold leading-none">{report.precipitation}</p> : null}
+            </div>
+            {secondaryWeatherDetails.length > 0 ? (
+              <p className="mt-1.5 truncate text-[10px] font-medium text-[#9a9d9d]">{secondaryWeatherDetails.join(" / ")}</p>
             ) : null}
           </div>
         </div>
@@ -157,7 +161,7 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
         </div>
         <div className="flex flex-col justify-center rounded-md border border-white/12 bg-[#293231] px-4 py-3 text-right">
           <p className="text-[10px] uppercase tracking-[0.18em] text-[#9a9d9d]">Time</p>
-          <p className="mt-1 whitespace-nowrap text-lg font-semibold"><BoardClock /></p>
+          <p className="mt-1 whitespace-nowrap text-2xl font-semibold"><BoardClock /></p>
         </div>
       </section>
 

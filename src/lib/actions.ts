@@ -1,7 +1,9 @@
 "use server";
 
+import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 
 import { requireAdmin, signInAdmin, signOutAdmin } from "@/lib/auth";
 import { ensureDailyPlan } from "@/lib/data";
@@ -10,7 +12,20 @@ import { normalizeDateKey } from "@/lib/dates";
 
 export type ActionState = {
   error?: string;
+  success?: string;
 };
+
+const adminAccountSchema = z.object({
+  name: z.string().trim().min(2, "Enter the administrator's name.").max(80),
+  email: z.string().trim().toLowerCase().email("Enter a valid email address."),
+  password: z
+    .string()
+    .min(12, "Password must be at least 12 characters.")
+    .max(128, "Password must be 128 characters or fewer.")
+    .regex(/[a-z]/, "Password must contain a lowercase letter.")
+    .regex(/[A-Z]/, "Password must contain an uppercase letter.")
+    .regex(/[0-9]/, "Password must contain a number."),
+});
 
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -31,6 +46,12 @@ function revalidateBoards() {
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/admin/present");
+}
+
+function requireConfirmation(formData: FormData, expected: string) {
+  if (text(formData, "confirmation") !== expected) {
+    throw new Error(`Type ${expected} to confirm this action.`);
+  }
 }
 
 export async function loginAction(_: ActionState, formData: FormData): Promise<ActionState> {
@@ -71,47 +92,70 @@ export async function updatePlanAction(formData: FormData) {
   revalidateBoards();
 }
 
-export async function saveEmployeeAssignmentAction(formData: FormData) {
+export async function saveAllAssignmentsAction(formData: FormData) {
   await requireAdmin();
   const date = normalizeDateKey(text(formData, "date"));
-  const employeeId = text(formData, "employeeId");
-  const title = text(formData, "intent") === "clear" ? "" : text(formData, "title");
+  const intent = text(formData, "intent");
 
-  if (!employeeId) {
-    throw new Error("Employee id is required.");
+  if (intent === "clear") {
+    const plan = await prisma.dailyPlan.findUnique({
+      where: { date },
+      select: { id: true },
+    });
+
+    if (plan) {
+      await prisma.assignment.deleteMany({ where: { planId: plan.id } });
+    }
+
+    revalidateBoards();
+    return;
   }
 
-  const employee = await prisma.employee.findUnique({
-    where: { id: employeeId },
+  const employeeIds = Array.from(
+    new Set(
+      formData
+        .getAll("employeeId")
+        .filter((value): value is string => typeof value === "string" && value.length > 0),
+    ),
+  );
+
+  if (employeeIds.length === 0) {
+    return;
+  }
+
+  const employees = await prisma.employee.findMany({
+    where: { id: { in: employeeIds }, active: true },
     select: { id: true },
   });
 
-  if (!employee) {
-    throw new Error("Employee not found.");
+  if (employees.length !== employeeIds.length) {
+    throw new Error("The employee list changed. Refresh the dashboard and try again.");
   }
 
   const plan = await ensureDailyPlan(date);
 
-  if (!title) {
-    await prisma.assignment.deleteMany({
-      where: { planId: plan.id, employeeId },
-    });
-  } else {
-    await prisma.assignment.upsert({
-      where: {
-        planId_employeeId: {
-          planId: plan.id,
-          employeeId,
-        },
-      },
-      update: { title },
-      create: {
-        planId: plan.id,
-        employeeId,
-        title,
-      },
-    });
-  }
+  await prisma.$transaction(async (transaction) => {
+    for (const employeeId of employeeIds) {
+      const title = text(formData, `assignment:${employeeId}`);
+
+      if (title) {
+        await transaction.assignment.upsert({
+          where: {
+            planId_employeeId: {
+              planId: plan.id,
+              employeeId,
+            },
+          },
+          update: { title },
+          create: { planId: plan.id, employeeId, title },
+        });
+      } else {
+        await transaction.assignment.deleteMany({
+          where: { planId: plan.id, employeeId },
+        });
+      }
+    }
+  });
 
   revalidateBoards();
 }
@@ -182,5 +226,88 @@ export async function deleteEmployeeAction(formData: FormData) {
   }
 
   await prisma.employee.delete({ where: { id } });
+  revalidateBoards();
+}
+
+export async function createAdminAction(_: ActionState, formData: FormData): Promise<ActionState> {
+  await requireAdmin();
+  const result = adminAccountSchema.safeParse({
+    name: text(formData, "name"),
+    email: text(formData, "email"),
+    password: text(formData, "password"),
+  });
+
+  if (!result.success) {
+    return { error: result.error.issues[0]?.message ?? "Enter valid administrator details." };
+  }
+
+  const existing = await prisma.adminUser.findUnique({
+    where: { email: result.data.email },
+    select: { id: true },
+  });
+
+  if (existing) {
+    return { error: "An administrator already uses that email address." };
+  }
+
+  await prisma.adminUser.create({
+    data: {
+      name: result.data.name,
+      email: result.data.email,
+      passwordHash: await bcrypt.hash(result.data.password, 12),
+    },
+  });
+
+  revalidatePath("/admin");
+  return { success: `${result.data.email} can now sign in.` };
+}
+
+export async function deleteAdminAction(formData: FormData) {
+  const currentAdmin = await requireAdmin();
+  const id = text(formData, "id");
+
+  if (!id) {
+    throw new Error("Administrator id is required.");
+  }
+
+  if (id === currentAdmin.id) {
+    throw new Error("You cannot delete the administrator account currently in use.");
+  }
+
+  await prisma.adminUser.delete({ where: { id } });
+  revalidatePath("/admin");
+}
+
+export async function clearEmployeesAction(formData: FormData) {
+  await requireAdmin();
+  requireConfirmation(formData, "CLEAR EMPLOYEES");
+
+  await prisma.$transaction([
+    prisma.assignment.deleteMany(),
+    prisma.employee.deleteMany(),
+    prisma.$executeRawUnsafe('DELETE FROM "Assignment"'),
+    prisma.$executeRawUnsafe('DELETE FROM "Absence"'),
+    prisma.$executeRawUnsafe('DELETE FROM "Employee"'),
+  ]);
+
+  revalidateBoards();
+}
+
+export async function clearAllDataAction(formData: FormData) {
+  const currentAdmin = await requireAdmin();
+  requireConfirmation(formData, "CLEAR ALL DATA");
+
+  await prisma.$transaction([
+    prisma.assignment.deleteMany(),
+    prisma.employee.deleteMany(),
+    prisma.$executeRawUnsafe('DELETE FROM "Assignment"'),
+    prisma.$executeRawUnsafe('DELETE FROM "Absence"'),
+    prisma.$executeRawUnsafe('DELETE FROM "JobTemplate"'),
+    prisma.$executeRawUnsafe('DELETE FROM "Employee"'),
+    prisma.$executeRawUnsafe('DELETE FROM "Category"'),
+    prisma.dailyPlan.deleteMany(),
+    prisma.adminUser.deleteMany({ where: { id: { not: currentAdmin.id } } }),
+  ]);
+
   revalidateBoards();
 }

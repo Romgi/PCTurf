@@ -1,10 +1,10 @@
 "use client";
 
 import { useId, useMemo, useState } from "react";
-import { Check, ClipboardPenLine, X } from "lucide-react";
+import { ClipboardPenLine, Save, Trash2 } from "lucide-react";
 
 import { SubmitButton } from "@/components/submit-button";
-import { saveEmployeeAssignmentAction } from "@/lib/actions";
+import { saveAllAssignmentsAction } from "@/lib/actions";
 import { cn } from "@/lib/ui";
 
 type AssignmentRow = {
@@ -36,11 +36,9 @@ function uniqueSuggestions(values: string[]) {
 
 function AssignmentInput({
   allSuggestions,
-  date,
   row,
 }: {
   allSuggestions: string[];
-  date: string;
   row: AssignmentRow;
 }) {
   const [value, setValue] = useState(row.assignmentTitle);
@@ -63,93 +61,85 @@ function AssignmentInput({
   }, [allSuggestions, isFiltering, row.commonJobs, value]);
 
   return (
-    <form
-      action={saveEmployeeAssignmentAction}
-      className="grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_auto]"
-      onSubmit={() => setOpen(false)}
+    <div
+      className="relative min-w-0"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
     >
-      <input type="hidden" name="date" value={date} />
-      <input type="hidden" name="employeeId" value={row.employee.id} />
-      <div
-        className="relative min-w-0"
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      <ClipboardPenLine
+        aria-hidden="true"
+        className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#9a9d9d]"
+      />
+      <input
+        aria-autocomplete="list"
+        aria-controls={listboxId}
+        aria-expanded={open}
+        autoComplete="off"
+        className="input h-11 pl-9"
+        name={`assignment:${row.employee.id}`}
+        onChange={(event) => {
+          setValue(event.target.value);
+          setIsFiltering(true);
+          setOpen(true);
         }}
-      >
-        <ClipboardPenLine
-          aria-hidden="true"
-          className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-[#9a9d9d]"
-        />
-        <input
-          aria-autocomplete="list"
-          aria-controls={listboxId}
-          aria-expanded={open}
-          autoComplete="off"
-          className="input h-11 pl-9"
-          name="title"
-          onChange={(event) => {
-            setValue(event.target.value);
-            setIsFiltering(true);
-            setOpen(true);
-          }}
-          onFocus={() => {
-            setIsFiltering(false);
-            setOpen(true);
-          }}
-          placeholder="Type or choose a job"
-          role="combobox"
-          value={value}
-        />
-        {open && suggestions.length > 0 ? (
-          <div
-            className="absolute inset-x-0 top-[calc(100%+0.35rem)] z-30 overflow-hidden rounded-md border border-white/15 bg-[#202827] shadow-2xl"
-            id={listboxId}
-            role="listbox"
-          >
-            {suggestions.map((suggestion) => (
-              <button
-                className="block w-full border-b border-white/8 px-3 py-2.5 text-left text-sm font-medium text-[#f4f1eb] last:border-b-0 hover:bg-white/[0.08] focus:bg-white/[0.08]"
-                key={suggestion}
-                onClick={() => {
-                  setValue(suggestion);
-                  setIsFiltering(false);
-                  setOpen(false);
-                }}
-                aria-selected={suggestion.toLocaleLowerCase() === value.trim().toLocaleLowerCase()}
-                role="option"
-                type="button"
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-        ) : null}
-      </div>
-      <div className="flex gap-2">
-        <SubmitButton className="h-11 gap-2 px-3" pendingText="Saving">
-          <Check className="h-4 w-4" />
-          Save
-        </SubmitButton>
-        {row.assignmentTitle ? (
-          <SubmitButton
-            className="h-11 w-11 px-0"
-            name="intent"
-            pendingText="..."
-            value="clear"
-            variant="ghost"
-          >
-            <span className="sr-only">Clear assignment for {row.employee.name}</span>
-            <X className="h-4 w-4" />
-          </SubmitButton>
-        ) : null}
-      </div>
-    </form>
+        onFocus={() => {
+          setIsFiltering(false);
+          setOpen(true);
+        }}
+        placeholder="Type or choose a job"
+        role="combobox"
+        value={value}
+      />
+      {open && suggestions.length > 0 ? (
+        <div
+          className="absolute inset-x-0 top-[calc(100%+0.35rem)] z-30 overflow-hidden rounded-md border border-white/15 bg-[#202827] shadow-2xl"
+          id={listboxId}
+          role="listbox"
+        >
+          {suggestions.map((suggestion) => (
+            <button
+              aria-selected={suggestion.toLocaleLowerCase() === value.trim().toLocaleLowerCase()}
+              className="block w-full border-b border-white/8 px-3 py-2.5 text-left text-sm font-medium text-[#f4f1eb] last:border-b-0 hover:bg-white/[0.08] focus:bg-white/[0.08]"
+              key={suggestion}
+              onClick={() => {
+                setValue(suggestion);
+                setIsFiltering(false);
+                setOpen(false);
+              }}
+              role="option"
+              type="button"
+            >
+              {suggestion}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
 export function AssignmentRoster({ allSuggestions, date, rows }: AssignmentRosterProps) {
   return (
-    <div className="overflow-visible rounded-md border border-white/12">
+    <form action={saveAllAssignmentsAction} className="overflow-visible rounded-md border border-white/12">
+      <input name="date" type="hidden" value={date} />
+      <div className="flex flex-wrap items-center justify-end gap-2 border-b border-white/12 bg-[#202827] px-4 py-3">
+        <SubmitButton className="gap-2" name="intent" pendingText="Saving all" value="save">
+          <Save className="h-4 w-4" />
+          Save all
+        </SubmitButton>
+        <SubmitButton
+          className="gap-2"
+          confirmMessage={`Clear every assignment for ${date}?`}
+          name="intent"
+          pendingText="Clearing"
+          value="clear"
+          variant="danger"
+        >
+          <Trash2 className="h-4 w-4" />
+          Clear all
+        </SubmitButton>
+      </div>
       {rows.length > 0 ? (
         rows.map((row, index) => (
           <div
@@ -159,11 +149,16 @@ export function AssignmentRoster({ allSuggestions, date, rows }: AssignmentRoste
             )}
             key={row.employee.id}
           >
+            <input name="employeeId" type="hidden" value={row.employee.id} />
             <div className="min-w-0">
               <p className="truncate font-semibold text-[#f4f1eb]">{row.employee.name}</p>
               {row.employee.title ? <p className="mt-0.5 truncate text-xs text-[#9a9d9d]">{row.employee.title}</p> : null}
             </div>
-            <AssignmentInput allSuggestions={allSuggestions} date={date} row={row} />
+            <AssignmentInput
+              allSuggestions={allSuggestions}
+              key={`${row.employee.id}:${row.assignmentTitle}`}
+              row={row}
+            />
           </div>
         ))
       ) : (
@@ -171,6 +166,6 @@ export function AssignmentRoster({ allSuggestions, date, rows }: AssignmentRoste
           Add an active employee to begin assigning jobs.
         </p>
       )}
-    </div>
+    </form>
   );
 }

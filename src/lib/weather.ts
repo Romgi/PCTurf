@@ -6,6 +6,7 @@ const PORT_CARLING = {
   latitude: 45.1168,
   longitude: -79.575,
 };
+const CELSIUS = "\u00B0C";
 
 const WEATHER_CODE_LABELS: Record<number, string> = {
   0: "Clear",
@@ -156,7 +157,7 @@ export async function getPortCarlingWeather(date: string): Promise<WeatherReport
     const feelsLike = round(current?.apparent_temperature);
     const currentWind = round(current?.wind_speed_10m);
     const humidity = round(current?.relative_humidity_2m);
-    const highLow = high !== undefined && low !== undefined ? `High ${high} C / Low ${low} C` : undefined;
+    const highLow = high !== undefined && low !== undefined ? `High ${high}${CELSIUS} / Low ${low}${CELSIUS}` : undefined;
     const precipitation =
       precipChance !== undefined
         ? `${precipChance}% chance${precipSum ? ` / ${precipSum} mm` : ""}`
@@ -169,13 +170,13 @@ export async function getPortCarlingWeather(date: string): Promise<WeatherReport
     const metrics: WeatherMetric[] = [];
 
     if (useCurrent) {
-      addMetric(metrics, "Current", currentTemperature !== undefined ? `${currentTemperature} C` : undefined);
-      addMetric(metrics, "Feels like", feelsLike !== undefined ? `${feelsLike} C` : undefined);
+      addMetric(metrics, "Current", currentTemperature !== undefined ? `${currentTemperature}${CELSIUS}` : undefined);
+      addMetric(metrics, "Feels like", feelsLike !== undefined ? `${feelsLike}${CELSIUS}` : undefined);
     }
     addMetric(metrics, "High / low", highLow);
     if (useCurrent) {
       addMetric(metrics, "Humidity", humidity !== undefined ? `${humidity}%` : undefined);
-      addMetric(metrics, "Dew point", round(current?.dew_point_2m) !== undefined ? `${round(current?.dew_point_2m)} C` : undefined);
+      addMetric(metrics, "Dew point", round(current?.dew_point_2m) !== undefined ? `${round(current?.dew_point_2m)}${CELSIUS}` : undefined);
       addMetric(metrics, "Wind now", currentWind !== undefined ? `${currentWind} km/h` : undefined);
       addMetric(metrics, "Gusts now", round(current?.wind_gusts_10m) !== undefined ? `${round(current?.wind_gusts_10m)} km/h` : undefined);
       addMetric(metrics, "Cloud cover", round(current?.cloud_cover) !== undefined ? `${round(current?.cloud_cover)}%` : undefined);
@@ -193,7 +194,7 @@ export async function getPortCarlingWeather(date: string): Promise<WeatherReport
       label: useCurrent ? "Now in Port Carling, Ontario" : "Forecast for Port Carling, Ontario",
       summary: codeLabel(useCurrent ? current?.weather_code : daily?.weather_code?.[dailyIndex]),
       temperature: useCurrent && currentTemperature !== undefined
-        ? `${currentTemperature} C${feelsLike !== undefined ? `, feels ${feelsLike} C` : ""}`
+        ? `${currentTemperature}${CELSIUS}${feelsLike !== undefined ? `, feels ${feelsLike}${CELSIUS}` : ""}`
         : undefined,
       highLow,
       wind,

@@ -81,7 +81,7 @@ function rankJobs(jobs: Map<string, RankedJob>, limit?: number) {
 
 export async function getDashboardData(dateInput?: string | null) {
   const board = await getBoardData(dateInput);
-  const [allEmployees, recentPlans, assignmentHistory] = await Promise.all([
+  const [allEmployees, recentPlans, assignmentHistory, allAdmins] = await Promise.all([
     prisma.employee.findMany({
       orderBy: [{ active: "desc" }, { displayOrder: "asc" }, { name: "asc" }],
     }),
@@ -93,6 +93,10 @@ export async function getDashboardData(dateInput?: string | null) {
       select: { employeeId: true, title: true },
       orderBy: { updatedAt: "desc" },
       take: 5000,
+    }),
+    prisma.adminUser.findMany({
+      select: { id: true, name: true, email: true, createdAt: true },
+      orderBy: [{ name: "asc" }, { email: "asc" }],
     }),
   ]);
 
@@ -115,6 +119,7 @@ export async function getDashboardData(dateInput?: string | null) {
   return {
     ...board,
     allEmployees,
+    allAdmins,
     recentPlans,
     allSuggestions,
     assignmentRows: board.employeeAssignments.map(({ employee, assignment }) => ({

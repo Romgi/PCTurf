@@ -30,7 +30,8 @@ export function SubmitButton({
   value,
   variant = "primary",
 }: SubmitButtonProps) {
-  const { pending } = useFormStatus();
+  const { data, pending } = useFormStatus();
+  const isActiveSubmitter = pending && (!name || data?.get(name) === value);
 
   return (
     <button
@@ -49,7 +50,7 @@ export function SubmitButton({
       )}
       value={value}
     >
-      {pending ? pendingText : children}
+      {isActiveSubmitter ? pendingText : children}
     </button>
   );
 }
