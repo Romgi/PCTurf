@@ -24,7 +24,7 @@ export default async function PresentPage({ searchParams }: PresentPageProps) {
   const boardData = getBoardData(date);
 
   if (params?.view === "jobs") {
-    return <JobBoard data={await boardData} present showFullscreen />;
+    return <JobBoard data={await boardData} showFullscreen />;
   }
 
   const [data, slides] = await Promise.all([boardData, getPresentationSlides()]);

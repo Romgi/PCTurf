@@ -63,9 +63,6 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
             <MonitorUp className="h-4 w-4" />
             Present
           </Link>
-          <Link className="nav-button" href="/">
-            Public board
-          </Link>
           <form action={logoutAction}>
             <SubmitButton className="gap-2" variant="ghost">
               <LogOut className="h-4 w-4" />

@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { BoardClock } from "@/components/board-clock";
 import { BrandLockup } from "@/components/brand-lockup";
 import { FullscreenButton } from "@/components/fullscreen-button";
@@ -10,97 +8,14 @@ import { cn } from "@/lib/ui";
 
 type JobBoardProps = {
   data: BoardData;
-  present?: boolean;
-  showAdminLink?: boolean;
   showFullscreen?: boolean;
 };
 
 export function JobBoard({
   data,
-  present = false,
-  showAdminLink = false,
   showFullscreen = false,
 }: JobBoardProps) {
-  if (present) {
-    return <PresentBoard data={data} showFullscreen={showFullscreen} />;
-  }
-
-  return <StandardBoard data={data} showAdminLink={showAdminLink} showFullscreen={showFullscreen} />;
-}
-
-function StandardBoard({
-  data,
-  showAdminLink,
-  showFullscreen,
-}: {
-  data: BoardData;
-  showAdminLink: boolean;
-  showFullscreen: boolean;
-}) {
-  return (
-    <main className="min-h-screen bg-[#333e3d] px-4 py-5 text-[#f4f1eb] sm:px-6 lg:px-8">
-      <header className="mx-auto flex max-w-[1680px] flex-col gap-5 border-b border-white/12 pb-5 sm:flex-row sm:items-center sm:justify-between">
-        <BrandLockup />
-        <div className="flex items-start justify-between gap-4 sm:justify-end sm:text-right">
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-[#9a9d9d]">Daily Turf Board</p>
-            <h1 className="mt-1 text-2xl font-semibold sm:text-3xl">{formatDisplayDate(data.date)}</h1>
-          </div>
-          <div className="flex gap-2">
-            {showFullscreen ? <FullscreenButton /> : null}
-            {showAdminLink ? (
-              <Link className="nav-button" href="/admin/login">
-                Login
-              </Link>
-            ) : null}
-          </div>
-        </div>
-      </header>
-
-      <section className="mx-auto mt-5 grid max-w-[1680px] gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
-        <WeatherPanel data={data} />
-        <div className="rounded-md border border-white/12 bg-[#293231] px-5 py-4 text-right">
-          <p className="text-xs uppercase tracking-[0.22em] text-[#9a9d9d]">Current time</p>
-          <p className="mt-1 text-3xl font-semibold"><BoardClock /></p>
-        </div>
-      </section>
-
-      {data.plan.notes ? (
-        <section className="mx-auto mt-4 max-w-[1680px] rounded-md border border-white/12 bg-[#293231] px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.22em] text-[#9a9d9d]">Superintendent note</p>
-          <p className="mt-2 leading-7">{data.plan.notes}</p>
-        </section>
-      ) : null}
-
-      <section className="mx-auto mt-5 max-w-[1680px] overflow-hidden rounded-md border border-white/12">
-        <div className="hidden grid-cols-[minmax(190px,0.38fr)_1fr] border-b border-white/12 bg-[#202827] px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#9a9d9d] sm:grid">
-          <span>Employee</span>
-          <span>Job</span>
-        </div>
-        {data.employeeAssignments.length > 0 ? (
-          data.employeeAssignments.map(({ employee, assignment }, index) => (
-            <article
-              className={cn(
-                "grid gap-2 border-b border-white/10 px-4 py-3 last:border-b-0 sm:grid-cols-[minmax(190px,0.38fr)_1fr] sm:items-center sm:px-5",
-                index % 2 === 0 ? "bg-[#293231]" : "bg-[#303938]",
-              )}
-              key={employee.id}
-            >
-              <div className="min-w-0">
-                <h2 className="truncate text-base font-semibold">{employee.name}</h2>
-                {employee.title ? <p className="mt-0.5 truncate text-xs text-[#9a9d9d]">{employee.title}</p> : null}
-              </div>
-              <p className={cn("min-w-0 text-lg font-semibold", !assignment && "text-[#9a9d9d]")}>
-                {assignment?.title || "No job posted"}
-              </p>
-            </article>
-          ))
-        ) : (
-          <p className="bg-[#293231] px-5 py-10 text-center text-[#9a9d9d]">No active employees are listed.</p>
-        )}
-      </section>
-    </main>
-  );
+  return <PresentBoard data={data} showFullscreen={showFullscreen} />;
 }
 
 function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscreen: boolean }) {
@@ -196,34 +111,5 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
         </section>
       )}
     </main>
-  );
-}
-
-function WeatherPanel({ data }: { data: BoardData }) {
-  const report = data.weatherReport;
-  const details = [report.temperature, report.highLow, report.wind, report.precipitation, report.humidity].filter(Boolean);
-
-  return (
-    <div className="rounded-md border border-white/12 bg-[#293231] px-5 py-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-[#9a9d9d]">{report.label}</p>
-          <p className="mt-2 text-2xl font-semibold">{report.summary}</p>
-        </div>
-        {details.length > 0 ? (
-          <div className="flex flex-wrap gap-2 lg:justify-end">
-            {details.map((detail) => (
-              <span className="rounded border border-white/12 bg-[#333e3d] px-3 py-2 text-sm text-[#d8dad7]" key={detail}>{detail}</span>
-            ))}
-          </div>
-        ) : null}
-      </div>
-      {data.plan.weather ? (
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <p className="text-xs uppercase tracking-[0.18em] text-[#9a9d9d]">Superintendent course note</p>
-          <p className="mt-2 leading-7">{data.plan.weather}</p>
-        </div>
-      ) : null}
-    </div>
   );
 }

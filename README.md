@@ -4,12 +4,13 @@ Next.js job board for the Port Carling Golf and Country Club turf department.
 
 ## Routes
 
-- `/` - Public TV job board for the current day.
+- `/` - Protected redirect to the presentation slideshow.
 - `/admin/login` - Superintendent login.
 - `/admin` - Protected dashboard for managing employees, notes, and daily assignments.
-- `/admin/present` - Fullscreen-focused board for the selected day.
+- `/admin/present` - Protected fullscreen slideshow with weather, time, and the assignment reveal control.
+- `/admin/present?view=jobs` - Protected fullscreen job assignments for the selected day.
 
-The board shows live Port Carling weather, the admin's course/weather note, and any boss notes for the selected date. Present mode is employee-first so staff can scan for their name and job quickly.
+All presentation and management views require an administrator login. The assignment board shows live Port Carling weather, the admin's course/weather note, and any boss notes for the selected date. Assignments are employee-first so staff can scan for their name and job quickly.
 
 ## Local Setup
 
