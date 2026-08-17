@@ -37,11 +37,6 @@ function optionalText(formData: FormData, key: string) {
   return value.length > 0 ? value : null;
 }
 
-function intValue(formData: FormData, key: string, fallback = 0) {
-  const parsed = Number.parseInt(text(formData, key), 10);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
 function revalidateBoards() {
   revalidatePath("/");
   revalidatePath("/admin");
@@ -168,11 +163,15 @@ export async function createEmployeeAction(formData: FormData) {
     throw new Error("Employee name is required.");
   }
 
+  const lastEmployee = await prisma.employee.aggregate({
+    _max: { displayOrder: true },
+  });
+
   await prisma.employee.create({
     data: {
       name,
       title: optionalText(formData, "title"),
-      displayOrder: intValue(formData, "displayOrder"),
+      displayOrder: (lastEmployee._max.displayOrder ?? -1) + 1,
     },
   });
 
@@ -193,9 +192,43 @@ export async function updateEmployeeAction(formData: FormData) {
     data: {
       name,
       title: optionalText(formData, "title"),
-      displayOrder: intValue(formData, "displayOrder"),
     },
   });
+
+  revalidateBoards();
+}
+
+export async function reorderEmployeesAction(employeeIds: string[]) {
+  await requireAdmin();
+
+  if (!Array.isArray(employeeIds) || employeeIds.some((id) => typeof id !== "string" || !id)) {
+    throw new Error("Invalid employee order.");
+  }
+
+  const uniqueIds = Array.from(new Set(employeeIds));
+  if (uniqueIds.length !== employeeIds.length) {
+    throw new Error("Employee order contains duplicates.");
+  }
+
+  const [employeeCount, totalEmployeeCount] = await Promise.all([
+    prisma.employee.count({ where: { id: { in: uniqueIds } } }),
+    prisma.employee.count(),
+  ]);
+
+  if (employeeCount !== uniqueIds.length || totalEmployeeCount !== uniqueIds.length) {
+    throw new Error("Employee list changed. Refresh and try again.");
+  }
+
+  if (uniqueIds.length === 0) return;
+
+  await prisma.$transaction(
+    uniqueIds.map((id, displayOrder) =>
+      prisma.employee.update({
+        where: { id },
+        data: { displayOrder },
+      }),
+    ),
+  );
 
   revalidateBoards();
 }

@@ -83,7 +83,7 @@ export async function getDashboardData(dateInput?: string | null) {
   const board = await getBoardData(dateInput);
   const [allEmployees, recentPlans, assignmentHistory, allAdmins] = await Promise.all([
     prisma.employee.findMany({
-      orderBy: [{ active: "desc" }, { displayOrder: "asc" }, { name: "asc" }],
+      orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
     }),
     prisma.dailyPlan.findMany({
       orderBy: { date: "desc" },

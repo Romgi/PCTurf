@@ -1,17 +1,9 @@
 import Link from "next/link";
-import {
-  Cloud,
-  CloudFog,
-  CloudLightning,
-  CloudRain,
-  CloudSnow,
-  CloudSun,
-  Sun,
-} from "lucide-react";
 
 import { BoardClock } from "@/components/board-clock";
 import { BrandLockup } from "@/components/brand-lockup";
 import { FullscreenButton } from "@/components/fullscreen-button";
+import { WeatherIcon } from "@/components/weather-icon";
 import type { BoardData } from "@/lib/data";
 import { formatDisplayDate } from "@/lib/dates";
 import { cn } from "@/lib/ui";
@@ -139,7 +131,7 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
       <section className="my-2 grid shrink-0 grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)_auto] gap-1.5">
         <div className="flex min-h-20 min-w-0 items-center gap-4 rounded-md border border-white/12 bg-[#293231] px-4 py-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-white/12 bg-[#333e3d]">
-            <PresentWeatherIcon summary={report.summary} />
+            <WeatherIcon className="h-8 w-8" summary={report.summary} />
           </div>
           <div className="min-w-0">
             <p className="text-[10px] uppercase tracking-[0.18em] text-[#9a9d9d]">{report.label}</p>
@@ -205,27 +197,6 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
       )}
     </main>
   );
-}
-
-function PresentWeatherIcon({ summary }: { summary: string }) {
-  const condition = summary.toLocaleLowerCase();
-  const Icon = condition.includes("thunder")
-    ? CloudLightning
-    : condition.includes("snow")
-      ? CloudSnow
-      : condition.includes("rain") || condition.includes("drizzle") || condition.includes("shower")
-        ? CloudRain
-        : condition.includes("fog")
-          ? CloudFog
-          : condition.includes("partly") || condition.includes("mainly")
-            ? CloudSun
-            : condition.includes("overcast") || condition.includes("cloud")
-              ? Cloud
-              : condition.includes("clear")
-                ? Sun
-                : CloudSun;
-
-  return <Icon aria-hidden="true" className="h-8 w-8 text-[#f4f1eb]" strokeWidth={1.6} />;
 }
 
 function WeatherPanel({ data }: { data: BoardData }) {

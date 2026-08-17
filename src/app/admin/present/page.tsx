@@ -1,7 +1,9 @@
 import { JobBoard } from "@/components/job-board";
+import { PresentLobby } from "@/components/present-lobby";
 import { requireAdmin } from "@/lib/auth";
 import { getBoardData } from "@/lib/data";
 import { normalizeDateKey } from "@/lib/dates";
+import { getPresentationSlides } from "@/lib/slides";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -11,6 +13,7 @@ export const metadata = {
 type PresentPageProps = {
   searchParams?: Promise<{
     date?: string;
+    view?: string;
   }>;
 };
 
@@ -18,7 +21,13 @@ export default async function PresentPage({ searchParams }: PresentPageProps) {
   await requireAdmin();
   const params = await searchParams;
   const date = normalizeDateKey(params?.date);
-  const data = await getBoardData(date);
+  const boardData = getBoardData(date);
 
-  return <JobBoard data={data} present showFullscreen />;
+  if (params?.view === "jobs") {
+    return <JobBoard data={await boardData} present showFullscreen />;
+  }
+
+  const [data, slides] = await Promise.all([boardData, getPresentationSlides()]);
+
+  return <PresentLobby date={date} slides={slides} weather={data.weatherReport} />;
 }

@@ -19,8 +19,9 @@ export const metadata: Metadata = {
   },
   description: "Daily turf department job board for Port Carling Golf and Country Club.",
   icons: {
-    icon: "/pc-icon.png",
-    apple: "/pc-icon.png",
+    icon: [{ url: "/pc-icon.png", type: "image/png", sizes: "300x300" }],
+    shortcut: "/pc-icon.png",
+    apple: [{ url: "/pc-icon.png", type: "image/png", sizes: "300x300" }],
   },
 };
 
