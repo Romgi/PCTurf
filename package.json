@@ -2,16 +2,24 @@
   "name": "pcturf-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "vercel-build": "npm run deploy:check && prisma generate && prisma migrate deploy && npm run db:seed && next build",
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
-    "db:setup": "node scripts/setup-db.mjs && prisma generate && npm run db:seed",
+    "db:setup": "npm run db:migrate && npm run db:seed",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:import:sqlite": "node scripts/import-sqlite.mjs",
+    "db:studio": "prisma studio",
+    "deploy:check": "node scripts/check-deploy-env.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
