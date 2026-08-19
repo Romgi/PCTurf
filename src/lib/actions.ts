@@ -57,7 +57,14 @@ export async function loginAction(_: ActionState, formData: FormData): Promise<A
     return { error: "Enter an email and password." };
   }
 
-  const success = await signInAdmin(email, password);
+  let success: boolean;
+
+  try {
+    success = await signInAdmin(email, password);
+  } catch (error) {
+    console.error("[auth] Administrator sign-in failed.", error);
+    return { error: "Sign-in is temporarily unavailable. Try again in a moment." };
+  }
 
   if (!success) {
     return { error: "The email or password is incorrect." };
@@ -318,9 +325,6 @@ export async function clearEmployeesAction(formData: FormData) {
   await prisma.$transaction([
     prisma.assignment.deleteMany(),
     prisma.employee.deleteMany(),
-    prisma.$executeRawUnsafe('DELETE FROM "Assignment"'),
-    prisma.$executeRawUnsafe('DELETE FROM "Absence"'),
-    prisma.$executeRawUnsafe('DELETE FROM "Employee"'),
   ]);
 
   revalidateBoards();
@@ -333,11 +337,6 @@ export async function clearAllDataAction(formData: FormData) {
   await prisma.$transaction([
     prisma.assignment.deleteMany(),
     prisma.employee.deleteMany(),
-    prisma.$executeRawUnsafe('DELETE FROM "Assignment"'),
-    prisma.$executeRawUnsafe('DELETE FROM "Absence"'),
-    prisma.$executeRawUnsafe('DELETE FROM "JobTemplate"'),
-    prisma.$executeRawUnsafe('DELETE FROM "Employee"'),
-    prisma.$executeRawUnsafe('DELETE FROM "Category"'),
     prisma.dailyPlan.deleteMany(),
     prisma.adminUser.deleteMany({ where: { id: { not: currentAdmin.id } } }),
   ]);

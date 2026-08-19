@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/login-form";
@@ -27,9 +26,6 @@ export default async function LoginPage() {
           <p className="mt-2 text-sm leading-6 text-[#9a9d9d]">Sign in to manage employees, daily assignments, board notes, and future work days.</p>
         </div>
         <LoginForm />
-        <Link href="/" className="mt-5 inline-flex text-sm font-semibold text-[#f4f1eb] hover:underline">
-          Back to board
-        </Link>
       </section>
     </main>
   );

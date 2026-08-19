@@ -63,25 +63,29 @@ export async function getCurrentAdmin() {
     return null;
   }
 
+  const secret = getSecret();
+  let payload;
+
   try {
-    const { payload } = await jwtVerify(token, getSecret());
-    const id = payload.sub;
-
-    if (!id) {
-      return null;
-    }
-
-    return prisma.adminUser.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
-    });
+    ({ payload } = await jwtVerify(token, secret));
   } catch {
     return null;
   }
+
+  const id = payload.sub;
+
+  if (!id) {
+    return null;
+  }
+
+  return prisma.adminUser.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  });
 }
 
 export async function requireAdmin() {

@@ -20,7 +20,7 @@ export function LoginForm() {
           autoComplete="email"
           required
           className="input"
-          placeholder="boss@pcturf.local"
+          placeholder="admin@example.com"
         />
       </label>
       <label className="grid gap-2 text-sm font-medium text-[#d8dad7]">

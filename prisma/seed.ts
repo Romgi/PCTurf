@@ -1,105 +1,54 @@
+import "dotenv/config";
+
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-function todayKey() {
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: process.env.APP_TIME_ZONE ?? "America/Toronto",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+function required(name: string) {
+  const value = process.env[name]?.trim();
 
-  const parts = Object.fromEntries(
-    formatter.formatToParts(new Date()).map((part) => [part.type, part.value]),
-  );
+  if (!value) {
+    throw new Error(`${name} is required to bootstrap the administrator account.`);
+  }
 
-  return `${parts.year}-${parts.month}-${parts.day}`;
+  return value;
 }
 
 async function main() {
-  const adminEmail = process.env.SEED_ADMIN_EMAIL ?? "boss@pcturf.local";
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "ChangeMe123!";
+  const name = process.env.SEED_ADMIN_NAME?.trim() || "Turf Admin";
+  const email = required("SEED_ADMIN_EMAIL").toLowerCase();
+  const password = required("SEED_ADMIN_PASSWORD");
+  const existingAdmin = await prisma.adminUser.findUnique({
+    where: { email },
+    select: { id: true },
+  });
 
-  await prisma.adminUser.upsert({
-    where: { email: adminEmail },
-    update: {
-      name: "Turf Admin",
-      passwordHash: await bcrypt.hash(adminPassword, 12),
-    },
-    create: {
-      name: "Turf Admin",
-      email: adminEmail,
-      passwordHash: await bcrypt.hash(adminPassword, 12),
+  if (existingAdmin) {
+    await prisma.adminUser.update({
+      where: { id: existingAdmin.id },
+      data: { name },
+    });
+    console.log(`Administrator ${email} is already configured.`);
+    return;
+  }
+
+  await prisma.adminUser.create({
+    data: {
+      name,
+      email,
+      passwordHash: await bcrypt.hash(password, 12),
     },
   });
 
-  const employees = [
-    ["Alex Martin", "Assistant Superintendent"],
-    ["Sam Patel", "Crew Lead"],
-    ["Jamie Brooks", null],
-    ["Taylor Reed", null],
-    ["Morgan Lee", null],
-    ["Chris Evans", null],
-    ["Jordan King", "Irrigation Technician"],
-    ["Riley Chen", null],
-  ] as const;
-
-  for (const [index, [name, title]] of employees.entries()) {
-    await prisma.employee.upsert({
-      where: { id: `seed-employee-${index}` },
-      update: {
-        name,
-        title,
-        displayOrder: index,
-        active: true,
-      },
-      create: {
-        id: `seed-employee-${index}`,
-        name,
-        title,
-        displayOrder: index,
-      },
-    });
-  }
-
-  const date = todayKey();
-  const plan = await prisma.dailyPlan.upsert({
-    where: { date },
-    update: {},
-    create: {
-      date,
-      notes: "Morning meeting at the shop before heading out.",
-      weather: "Check radar before mowing low areas.",
-    },
-  });
-
-  const seededAssignments = [
-    ["seed-employee-0", "Mow greens"],
-    ["seed-employee-1", "Roll greens"],
-    ["seed-employee-2", "Mow fairways"],
-    ["seed-employee-3", "Move tee markers"],
-    ["seed-employee-4", "Rake bunkers"],
-  ] as const;
-
-  if ((await prisma.assignment.count({ where: { planId: plan.id } })) === 0) {
-    await prisma.assignment.createMany({
-      data: seededAssignments.map(([employeeId, title]) => ({
-        planId: plan.id,
-        employeeId,
-        title,
-      })),
-    });
-  }
+  console.log(`Administrator ${email} was created.`);
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (error) => {
+  .catch((error) => {
     console.error(error);
+    process.exitCode = 1;
+  })
+  .finally(async () => {
     await prisma.$disconnect();
-    process.exit(1);
   });

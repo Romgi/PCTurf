@@ -18,6 +18,14 @@ export const metadata: Metadata = {
     template: "%s | PC Turf Board",
   },
   description: "Daily turf department job board for Port Carling Golf and Country Club.",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
   icons: {
     icon: [{ url: "/pc-icon.png", type: "image/png", sizes: "300x300" }],
     shortcut: "/pc-icon.png",
