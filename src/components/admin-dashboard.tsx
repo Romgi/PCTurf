@@ -20,6 +20,7 @@ import { SubmitButton } from "@/components/submit-button";
 import {
   clearAllDataAction,
   clearEmployeesAction,
+  clearRecentWorkDaysAction,
   deleteAdminAction,
   logoutAction,
   updatePlanAction,
@@ -304,6 +305,12 @@ function SystemAdministration({ currentAdminId, data }: { currentAdminId: string
           </div>
           <p className="mt-1 text-sm leading-6 text-[#9a9d9d]">These actions are permanent. Type the displayed phrase and confirm the browser warning to continue.</p>
           <div className="mt-5 grid gap-4">
+            <ResetControl
+              action={clearRecentWorkDaysAction}
+              description="Deletes every saved work day, including assignments and board notes. Employees and administrators remain."
+              phrase="CLEAR RECENT WORK DAYS"
+              title="Clear recent work days"
+            />
             <ResetControl
               action={clearEmployeesAction}
               description="Deletes every employee and all assignment history attached to them. Board notes and administrators remain."

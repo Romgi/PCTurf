@@ -330,6 +330,18 @@ export async function clearEmployeesAction(formData: FormData) {
   revalidateBoards();
 }
 
+export async function clearRecentWorkDaysAction(formData: FormData) {
+  await requireAdmin();
+  requireConfirmation(formData, "CLEAR RECENT WORK DAYS");
+
+  await prisma.$transaction([
+    prisma.assignment.deleteMany(),
+    prisma.dailyPlan.deleteMany(),
+  ]);
+
+  revalidateBoards();
+}
+
 export async function clearAllDataAction(formData: FormData) {
   const currentAdmin = await requireAdmin();
   requireConfirmation(formData, "CLEAR ALL DATA");
