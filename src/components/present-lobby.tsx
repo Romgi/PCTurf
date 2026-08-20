@@ -60,7 +60,7 @@ export function PresentLobby({ date, slides, weather }: PresentLobbyProps) {
       </div>
       <div aria-hidden="true" className="absolute inset-0 bg-black/30" />
 
-      <div className="relative z-10 flex min-h-full flex-col justify-between p-3 sm:p-5 lg:h-full lg:p-7">
+      <div className="relative z-10 flex min-h-full flex-col justify-between p-3 sm:p-5 lg:h-full lg:p-10">
         <header className="grid grid-cols-2 gap-2 lg:grid-cols-[auto_minmax(0,1fr)_auto] lg:gap-3">
           <section className="order-1 flex min-w-0 items-center rounded-md border border-white/15 bg-[#202827]/90 px-3 py-3 sm:px-5 sm:py-4">
             <div>
