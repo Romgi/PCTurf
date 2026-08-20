@@ -14,7 +14,7 @@ All presentation and management views require an administrator login. The assign
 
 ## Local Setup
 
-Create `.env` from `.env.example` and set a PostgreSQL `DATABASE_URL`, a random `AUTH_SECRET`, and the initial administrator credentials. Then run:
+Create `.env` from `.env.example` and set pooled `DATABASE_URL` and direct `DIRECT_URL` PostgreSQL connections, a random `AUTH_SECRET`, and the initial administrator credentials. Then run:
 
 ```powershell
 npm install
@@ -40,11 +40,12 @@ Each employee has one free-text assignment per day. Focusing an assignment field
 
 ## Vercel Deployment
 
-1. In the `pc-turf` Vercel project, open **Storage**, create a Neon Postgres database, and connect it to Production, Preview, and Development. The integration supplies `DATABASE_URL`.
-2. In **Settings > Environment Variables**, add `AUTH_SECRET`, `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and `APP_TIME_ZONE=America/Toronto` to the same environments.
-3. Redeploy the project.
+1. In the `pc-turf` Vercel project, open **Storage**, create a Neon Postgres database, and connect it to Production, Preview, and Development.
+2. In **Settings > Environment Variables**, map Neon's pooled Prisma URL to `DATABASE_URL` and its unpooled URL to `DIRECT_URL`.
+3. Add `AUTH_SECRET`, `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, and `APP_TIME_ZONE=America/Toronto` to the same environments.
+4. Redeploy the project.
 
-The Vercel build runs a configuration preflight, generates Prisma Client, applies committed migrations, creates the initial administrator when needed, and then builds Next.js. Existing administrator passwords are not reset by later deployments.
+The Vercel build runs a configuration preflight, generates Prisma Client, applies committed migrations over the direct connection with bounded advisory-lock retries, creates the initial administrator when needed, and then builds Next.js. Existing administrator passwords are not reset by later deployments.
 
 Secrets belong in Vercel environment variables and local ignored `.env` files. Do not commit them.
 

@@ -1,6 +1,7 @@
 const errors = [];
 
 const databaseUrl = process.env.DATABASE_URL?.trim();
+const directUrl = process.env.DIRECT_URL?.trim();
 const authSecret = process.env.AUTH_SECRET?.trim();
 const adminEmail = process.env.SEED_ADMIN_EMAIL?.trim();
 const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "";
@@ -9,6 +10,12 @@ if (!databaseUrl) {
   errors.push("DATABASE_URL is required.");
 } else if (!/^postgres(?:ql)?:\/\//i.test(databaseUrl)) {
   errors.push("DATABASE_URL must be a PostgreSQL connection string.");
+}
+
+if (!directUrl) {
+  errors.push("DIRECT_URL is required.");
+} else if (!/^postgres(?:ql)?:\/\//i.test(directUrl)) {
+  errors.push("DIRECT_URL must be a PostgreSQL connection string.");
 }
 
 if (!authSecret || authSecret.length < 32) {
