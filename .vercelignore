@@ -1,0 +1,8 @@
+.env
+.env.local
+.env.*.local
+.vercel
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-shm
+prisma/*.db-wal
