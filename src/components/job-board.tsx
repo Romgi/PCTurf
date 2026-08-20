@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
 import { BoardClock } from "@/components/board-clock";
 import { BrandLockup } from "@/components/brand-lockup";
 import { FullscreenButton } from "@/components/fullscreen-button";
@@ -40,6 +43,15 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
             <h1 className="mt-0.5 text-xl font-semibold">{formatDisplayDate(data.date)}</h1>
           </div>
           {showFullscreen ? <FullscreenButton className="h-9 px-3 text-xs" /> : null}
+          <Link
+            aria-label="Back to admin dashboard"
+            className="nav-button h-9 gap-2 px-3 text-xs"
+            href={`/admin?date=${data.date}`}
+            title="Back to admin dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to admin dashboard</span>
+          </Link>
         </div>
       </header>
 
