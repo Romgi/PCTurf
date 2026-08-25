@@ -204,17 +204,17 @@ function HeightOfCut({ data }: { data: DashboardData }) {
         <div className="grid divide-y divide-white/10 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
           <CutHeightGroup title="Greens">
             <CutHeightField
-              defaultValue={data.plan.greensWalkHeight?.toString() ?? ""}
+              defaultValue={data.plan.greensWalkHeight?.toFixed(3) ?? ""}
               label="Walk"
               name="greensWalkHeight"
             />
             <CutHeightField
-              defaultValue={data.plan.greensTriplexHeight?.toString() ?? ""}
+              defaultValue={data.plan.greensTriplexHeight?.toFixed(3) ?? ""}
               label="Triplex"
               name="greensTriplexHeight"
             />
             <CutHeightField
-              defaultValue={data.plan.greensCleanupHeight?.toString() ?? ""}
+              defaultValue={data.plan.greensCleanupHeight?.toFixed(3) ?? ""}
               label="Cleanup"
               name="greensCleanupHeight"
             />
@@ -222,12 +222,12 @@ function HeightOfCut({ data }: { data: DashboardData }) {
 
           <CutHeightGroup title="TCA">
             <CutHeightField
-              defaultValue={data.plan.tcaTeesHeight?.toString() ?? ""}
+              defaultValue={data.plan.tcaTeesHeight?.toFixed(3) ?? ""}
               label="Tees"
               name="tcaTeesHeight"
             />
             <CutHeightField
-              defaultValue={data.plan.tcaCollarsApproachesFairwaysHeight?.toString() ?? ""}
+              defaultValue={data.plan.tcaCollarsApproachesFairwaysHeight?.toFixed(3) ?? ""}
               label="Collars / approaches / fairways"
               name="tcaCollarsApproachesFairwaysHeight"
             />
@@ -235,12 +235,12 @@ function HeightOfCut({ data }: { data: DashboardData }) {
 
           <CutHeightGroup title="Rough">
             <CutHeightField
-              defaultValue={data.plan.roughHeight?.toString() ?? ""}
+              defaultValue={data.plan.roughHeight?.toFixed(3) ?? ""}
               label="Rough"
               name="roughHeight"
             />
             <CutHeightField
-              defaultValue={data.plan.roughSecondaryCutHeight?.toString() ?? ""}
+              defaultValue={data.plan.roughSecondaryCutHeight?.toFixed(3) ?? ""}
               label="Secondary cut"
               name="roughSecondaryCutHeight"
             />
