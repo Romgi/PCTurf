@@ -16,6 +16,7 @@ import {
 import { AdminAccountForm } from "@/components/admin-account-form";
 import { AssignmentRoster } from "@/components/assignment-roster";
 import { BrandLockup } from "@/components/brand-lockup";
+import { DirectionOfCut } from "@/components/direction-of-cut";
 import { EmployeeManager } from "@/components/employee-manager";
 import { SubmitButton } from "@/components/submit-button";
 import {
@@ -105,6 +106,22 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
         <div className="grid gap-5">
           <WeatherOverview data={data} />
           <HeightOfCut data={data} />
+          <DirectionOfCut
+            date={data.date}
+            initialDirections={{
+              greensCutDirection: data.plan.greensCutDirection,
+              approachesCutDirection: data.plan.approachesCutDirection,
+              teesCutDirection: data.plan.teesCutDirection,
+              fairwaysCutDirection: data.plan.fairwaysCutDirection,
+            }}
+            key={[
+              data.date,
+              data.plan.greensCutDirection,
+              data.plan.approachesCutDirection,
+              data.plan.teesCutDirection,
+              data.plan.fairwaysCutDirection,
+            ].join(":")}
+          />
         </div>
         <DayOverview assignedCount={assignedCount} data={data} />
       </div>

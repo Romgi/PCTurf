@@ -43,6 +43,10 @@ model DailyPlan {
   tcaCollarsApproachesFairwaysHeight String?
   roughHeight                        String?
   roughSecondaryCutHeight            String?
+  greensCutDirection                 String?
+  approachesCutDirection             String?
+  teesCutDirection                   String?
+  fairwaysCutDirection               String?
   assignments                        Assignment[]
   createdAt                          DateTime     @default(now())
   updatedAt                          DateTime     @updatedAt

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { requireAdmin, signInAdmin, signOutAdmin } from "@/lib/auth";
+import { CUT_DIRECTION_VALUES } from "@/lib/cut-directions";
 import { ensureDailyPlan } from "@/lib/data";
 import { prisma } from "@/lib/db";
 import { normalizeDateKey } from "@/lib/dates";
@@ -61,6 +62,17 @@ const optionalStartTimeSchema = z
     "Enter a valid start time.",
   )
   .transform((value) => value || null);
+
+const optionalCutDirectionSchema = z
+  .union([z.literal(""), z.enum(CUT_DIRECTION_VALUES)])
+  .transform((value) => value || null);
+
+const directionOfCutSchema = z.object({
+  greensCutDirection: optionalCutDirectionSchema,
+  approachesCutDirection: optionalCutDirectionSchema,
+  teesCutDirection: optionalCutDirectionSchema,
+  fairwaysCutDirection: optionalCutDirectionSchema,
+});
 
 const emptyHeightOfCut = {
   greensWalkHeight: null,
@@ -219,6 +231,30 @@ export async function updateHeightOfCutAction(formData: FormData) {
         defaults?.roughSecondaryCutHeight,
       ),
     },
+  });
+
+  revalidateBoards();
+}
+
+export async function updateDirectionOfCutAction(formData: FormData) {
+  await requireAdmin();
+  const date = normalizeDateKey(text(formData, "date"));
+  const result = directionOfCutSchema.safeParse({
+    greensCutDirection: text(formData, "greensCutDirection"),
+    approachesCutDirection: text(formData, "approachesCutDirection"),
+    teesCutDirection: text(formData, "teesCutDirection"),
+    fairwaysCutDirection: text(formData, "fairwaysCutDirection"),
+  });
+
+  if (!result.success) {
+    throw new Error("Select a valid direction of cut.");
+  }
+
+  const plan = await ensureDailyPlan(date);
+
+  await prisma.dailyPlan.update({
+    where: { id: plan.id },
+    data: result.data,
   });
 
   revalidateBoards();
