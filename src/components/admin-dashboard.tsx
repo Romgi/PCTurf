@@ -195,7 +195,7 @@ function HeightOfCut({ data }: { data: DashboardData }) {
           Height of Cut
         </p>
         <p className="mt-2 text-sm text-[#d8dad7]">
-          Defaults automatically fill each work day until different values are saved for that date.
+          Set the cutting heights for each area of the course to use as reference.
         </p>
       </div>
 
