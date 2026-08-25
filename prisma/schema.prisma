@@ -22,7 +22,7 @@ model Employee {
   title        String?
   active       Boolean      @default(true)
   displayOrder Int          @default(0)
-  assignments Assignment[]
+  assignments  Assignment[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -31,13 +31,20 @@ model Employee {
 }
 
 model DailyPlan {
-  id          String       @id @default(cuid())
-  date        String       @unique
-  notes       String?
-  weather     String?
-  assignments Assignment[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id                                 String       @id @default(cuid())
+  date                               String       @unique
+  notes                              String?
+  weather                            String?
+  greensWalkHeight                   Decimal?     @db.Decimal(5, 3)
+  greensTriplexHeight                Decimal?     @db.Decimal(5, 3)
+  greensCleanupHeight                Decimal?     @db.Decimal(5, 3)
+  tcaTeesHeight                      Decimal?     @db.Decimal(5, 3)
+  tcaCollarsApproachesFairwaysHeight Decimal?     @db.Decimal(5, 3)
+  roughHeight                        Decimal?     @db.Decimal(5, 3)
+  roughSecondaryCutHeight            Decimal?     @db.Decimal(5, 3)
+  assignments                        Assignment[]
+  createdAt                          DateTime     @default(now())
+  updatedAt                          DateTime     @updatedAt
 }
 
 model Assignment {

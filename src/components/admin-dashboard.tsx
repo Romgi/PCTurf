@@ -9,6 +9,7 @@ import {
   KeyRound,
   LogOut,
   MonitorUp,
+  Ruler,
   Trash2,
 } from "lucide-react";
 
@@ -23,6 +24,7 @@ import {
   clearRecentWorkDaysAction,
   deleteAdminAction,
   logoutAction,
+  updateHeightOfCutAction,
   updatePlanAction,
 } from "@/lib/actions";
 import type { DashboardData } from "@/lib/data";
@@ -98,8 +100,11 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
         </div>
       </section>
 
-      <div className="mx-auto mt-5 grid max-w-[1680px] gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(310px,0.65fr)]">
-        <WeatherOverview data={data} />
+      <div className="mx-auto mt-5 grid max-w-[1680px] items-start gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(310px,0.65fr)]">
+        <div className="grid gap-5">
+          <WeatherOverview data={data} />
+          <HeightOfCut data={data} />
+        </div>
         <DayOverview assignedCount={assignedCount} data={data} />
       </div>
 
@@ -178,6 +183,116 @@ function WeatherOverview({ data }: { data: DashboardData }) {
         <p className="px-5 py-5 text-sm text-[#9a9d9d]">Detailed weather data is currently unavailable.</p>
       )}
     </section>
+  );
+}
+
+function HeightOfCut({ data }: { data: DashboardData }) {
+  return (
+    <section className="overflow-hidden rounded-md border border-white/12 bg-[#293231]">
+      <div className="border-b border-white/10 px-5 py-4">
+        <p className="flex items-center gap-2 text-xs uppercase tracking-[0.22em] text-[#9a9d9d]">
+          <Ruler className="h-4 w-4" />
+          Height of Cut
+        </p>
+        <p className="mt-2 text-sm text-[#d8dad7]">Cutting heights for the selected work day, measured in inches.</p>
+      </div>
+
+      <form action={updateHeightOfCutAction}>
+        <input name="date" type="hidden" value={data.date} />
+        <div className="grid divide-y divide-white/10 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+          <CutHeightGroup title="Greens">
+            <CutHeightField
+              defaultValue={data.plan.greensWalkHeight?.toString() ?? ""}
+              label="Walk"
+              name="greensWalkHeight"
+            />
+            <CutHeightField
+              defaultValue={data.plan.greensTriplexHeight?.toString() ?? ""}
+              label="Triplex"
+              name="greensTriplexHeight"
+            />
+            <CutHeightField
+              defaultValue={data.plan.greensCleanupHeight?.toString() ?? ""}
+              label="Cleanup"
+              name="greensCleanupHeight"
+            />
+          </CutHeightGroup>
+
+          <CutHeightGroup title="TCA">
+            <CutHeightField
+              defaultValue={data.plan.tcaTeesHeight?.toString() ?? ""}
+              label="Tees"
+              name="tcaTeesHeight"
+            />
+            <CutHeightField
+              defaultValue={data.plan.tcaCollarsApproachesFairwaysHeight?.toString() ?? ""}
+              label="Collars / approaches / fairways"
+              name="tcaCollarsApproachesFairwaysHeight"
+            />
+          </CutHeightGroup>
+
+          <CutHeightGroup title="Rough">
+            <CutHeightField
+              defaultValue={data.plan.roughHeight?.toString() ?? ""}
+              label="Rough"
+              name="roughHeight"
+            />
+            <CutHeightField
+              defaultValue={data.plan.roughSecondaryCutHeight?.toString() ?? ""}
+              label="Secondary cut"
+              name="roughSecondaryCutHeight"
+            />
+          </CutHeightGroup>
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-[#9a9d9d]">Use whole inches or decimals up to three places. Leave a field blank to clear it.</p>
+          <SubmitButton className="shrink-0" pendingText="Saving heights">Save heights</SubmitButton>
+        </div>
+      </form>
+    </section>
+  );
+}
+
+function CutHeightGroup({ children, title }: { children: React.ReactNode; title: string }) {
+  return (
+    <fieldset className="min-w-0 px-5 py-4">
+      <legend className="text-sm font-semibold text-[#f4f1eb]">{title}</legend>
+      <div className="mt-3 grid gap-3">{children}</div>
+    </fieldset>
+  );
+}
+
+function CutHeightField({
+  defaultValue,
+  label,
+  name,
+}: {
+  defaultValue: string;
+  label: string;
+  name: string;
+}) {
+  return (
+    <label className="grid gap-2 text-xs font-semibold text-[#d8dad7]">
+      <span>{label}</span>
+      <span className="relative block">
+        <input
+          aria-label={`${label} height in inches`}
+          className="input w-full pr-9 tabular-nums"
+          defaultValue={defaultValue}
+          inputMode="decimal"
+          max="12"
+          min="0.001"
+          name={name}
+          placeholder="0.000"
+          step="0.001"
+          type="number"
+        />
+        <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-[#9a9d9d]">
+          in
+        </span>
+      </span>
+    </label>
   );
 }
 

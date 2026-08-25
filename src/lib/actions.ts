@@ -27,6 +27,31 @@ const adminAccountSchema = z.object({
     .regex(/[0-9]/, "Password must contain a number."),
 });
 
+const optionalCutHeightSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => {
+      if (!value) return true;
+      if (!/^(?:\d+(?:\.\d{1,3})?|\.\d{1,3})$/.test(value)) return false;
+
+      const height = Number(value);
+      return height >= 0.001 && height <= 12;
+    },
+    "Enter a height from 0.001 to 12 inches using no more than three decimal places.",
+  )
+  .transform((value) => value || null);
+
+const heightOfCutSchema = z.object({
+  greensWalkHeight: optionalCutHeightSchema,
+  greensTriplexHeight: optionalCutHeightSchema,
+  greensCleanupHeight: optionalCutHeightSchema,
+  tcaTeesHeight: optionalCutHeightSchema,
+  tcaCollarsApproachesFairwaysHeight: optionalCutHeightSchema,
+  roughHeight: optionalCutHeightSchema,
+  roughSecondaryCutHeight: optionalCutHeightSchema,
+});
+
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
@@ -89,6 +114,33 @@ export async function updatePlanAction(formData: FormData) {
       notes: optionalText(formData, "notes"),
       weather: optionalText(formData, "weather"),
     },
+  });
+
+  revalidateBoards();
+}
+
+export async function updateHeightOfCutAction(formData: FormData) {
+  await requireAdmin();
+  const date = normalizeDateKey(text(formData, "date"));
+  const result = heightOfCutSchema.safeParse({
+    greensWalkHeight: text(formData, "greensWalkHeight"),
+    greensTriplexHeight: text(formData, "greensTriplexHeight"),
+    greensCleanupHeight: text(formData, "greensCleanupHeight"),
+    tcaTeesHeight: text(formData, "tcaTeesHeight"),
+    tcaCollarsApproachesFairwaysHeight: text(formData, "tcaCollarsApproachesFairwaysHeight"),
+    roughHeight: text(formData, "roughHeight"),
+    roughSecondaryCutHeight: text(formData, "roughSecondaryCutHeight"),
+  });
+
+  if (!result.success) {
+    throw new Error(result.error.issues[0]?.message ?? "Enter valid cutting heights.");
+  }
+
+  const plan = await ensureDailyPlan(date);
+
+  await prisma.dailyPlan.update({
+    where: { id: plan.id },
+    data: result.data,
   });
 
   revalidateBoards();
