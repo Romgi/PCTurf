@@ -248,7 +248,7 @@ function HeightOfCut({ data }: { data: DashboardData }) {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#9a9d9d]">Entered decimal places and trailing zeros are preserved. Blank daily fields inherit available defaults.</p>
+          <p className="text-xs text-[#9a9d9d]">Set as default to automatically apply these heights to future work days.</p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <SubmitButton
               className="shrink-0"
