@@ -29,5 +29,12 @@ export default async function PresentPage({ searchParams }: PresentPageProps) {
 
   const [data, slides] = await Promise.all([boardData, getPresentationSlides()]);
 
-  return <PresentLobby date={date} slides={slides} weather={data.weatherReport} />;
+  return (
+    <PresentLobby
+      date={date}
+      slides={slides}
+      startTime={data.plan.startTime}
+      weather={data.weatherReport}
+    />
+  );
 }

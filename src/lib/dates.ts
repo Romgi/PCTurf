@@ -56,3 +56,16 @@ export function formatShortDate(dateKey: string) {
     day: "numeric",
   }).format(date);
 }
+
+export function formatTimeOfDay(time: string) {
+  const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(time);
+  if (!match) return time;
+
+  const date = new Date(Date.UTC(2000, 0, 1, Number(match[1]), Number(match[2])));
+
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "UTC",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}

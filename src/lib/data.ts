@@ -18,7 +18,7 @@ export async function getBoardData(dateInput?: string | null) {
   const date = normalizeDateKey(dateInput);
   const plan = await ensureDailyPlan(date);
 
-  const [employees, assignments, weatherReport, heightDefaults] = await Promise.all([
+  const [employees, assignments, weatherReport, heightDefaults, previousStartTimePlan] = await Promise.all([
     prisma.employee.findMany({
       where: { active: true },
       orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
@@ -30,6 +30,14 @@ export async function getBoardData(dateInput?: string | null) {
     }),
     getPortCarlingWeather(date),
     prisma.heightOfCutDefault.findUnique({ where: { id: "default" } }),
+    prisma.dailyPlan.findFirst({
+      where: {
+        date: { lt: date },
+        startTime: { not: null },
+      },
+      orderBy: { date: "desc" },
+      select: { startTime: true },
+    }),
   ]);
 
   const assignmentsByEmployee = new Map(
@@ -41,6 +49,7 @@ export async function getBoardData(dateInput?: string | null) {
   }));
   const effectivePlan = {
     ...plan,
+    startTime: plan.startTime ?? previousStartTimePlan?.startTime ?? null,
     greensWalkHeight: plan.greensWalkHeight ?? heightDefaults?.greensWalkHeight ?? null,
     greensTriplexHeight: plan.greensTriplexHeight ?? heightDefaults?.greensTriplexHeight ?? null,
     greensCleanupHeight: plan.greensCleanupHeight ?? heightDefaults?.greensCleanupHeight ?? null,
@@ -57,6 +66,7 @@ export async function getBoardData(dateInput?: string | null) {
   return {
     date,
     plan: effectivePlan,
+    startTimeInherited: plan.startTime === null && effectivePlan.startTime !== null,
     assignments,
     employees,
     employeeAssignments,

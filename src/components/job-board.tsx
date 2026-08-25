@@ -6,7 +6,7 @@ import { BrandLockup } from "@/components/brand-lockup";
 import { FullscreenButton } from "@/components/fullscreen-button";
 import { WeatherIcon } from "@/components/weather-icon";
 import type { BoardData } from "@/lib/data";
-import { formatDisplayDate } from "@/lib/dates";
+import { formatDisplayDate, formatTimeOfDay } from "@/lib/dates";
 import { cn } from "@/lib/ui";
 
 type JobBoardProps = {
@@ -86,6 +86,11 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
         <div className="flex flex-col justify-center rounded-md border border-white/12 bg-[#293231] px-3 py-3 text-left sm:px-4 lg:text-right">
           <p className="text-[10px] uppercase tracking-[0.18em] text-[#9a9d9d]">Time</p>
           <p className="mt-1 whitespace-nowrap text-2xl font-semibold"><BoardClock /></p>
+          {data.plan.startTime ? (
+            <p className="mt-1 whitespace-nowrap text-xs font-medium text-[#d8dad7]">
+              Start {formatTimeOfDay(data.plan.startTime)}
+            </p>
+          ) : null}
         </div>
       </section>
 

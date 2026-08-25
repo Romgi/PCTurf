@@ -53,6 +53,15 @@ const heightOfCutSchema = z.object({
   roughSecondaryCutHeight: optionalCutHeightSchema,
 });
 
+const optionalStartTimeSchema = z
+  .string()
+  .trim()
+  .refine(
+    (value) => !value || /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value),
+    "Enter a valid start time.",
+  )
+  .transform((value) => value || null);
+
 const emptyHeightOfCut = {
   greensWalkHeight: null,
   greensTriplexHeight: null,
@@ -130,6 +139,25 @@ export async function updatePlanAction(formData: FormData) {
       notes: optionalText(formData, "notes"),
       weather: optionalText(formData, "weather"),
     },
+  });
+
+  revalidateBoards();
+}
+
+export async function updateStartTimeAction(formData: FormData) {
+  await requireAdmin();
+  const date = normalizeDateKey(text(formData, "date"));
+  const result = optionalStartTimeSchema.safeParse(text(formData, "startTime"));
+
+  if (!result.success) {
+    throw new Error(result.error.issues[0]?.message ?? "Enter a valid start time.");
+  }
+
+  const plan = await ensureDailyPlan(date);
+
+  await prisma.dailyPlan.update({
+    where: { id: plan.id },
+    data: { startTime: result.data },
   });
 
   revalidateBoards();

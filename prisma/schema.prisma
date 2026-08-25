@@ -35,6 +35,7 @@ model DailyPlan {
   date                               String       @unique
   notes                              String?
   weather                            String?
+  startTime                          String?
   greensWalkHeight                   String?
   greensTriplexHeight                String?
   greensCleanupHeight                String?

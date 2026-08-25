@@ -9,7 +9,7 @@ import { BoardClock } from "@/components/board-clock";
 import { BrandLockup } from "@/components/brand-lockup";
 import { FullscreenButton } from "@/components/fullscreen-button";
 import { WeatherIcon } from "@/components/weather-icon";
-import { formatDisplayDate } from "@/lib/dates";
+import { formatDisplayDate, formatTimeOfDay } from "@/lib/dates";
 import { cn } from "@/lib/ui";
 
 type LobbyWeather = {
@@ -24,10 +24,11 @@ type LobbyWeather = {
 type PresentLobbyProps = {
   date: string;
   slides: string[];
+  startTime: string | null;
   weather: LobbyWeather;
 };
 
-export function PresentLobby({ date, slides, weather }: PresentLobbyProps) {
+export function PresentLobby({ date, slides, startTime, weather }: PresentLobbyProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -89,6 +90,11 @@ export function PresentLobby({ date, slides, weather }: PresentLobbyProps) {
           <section className="order-2 flex min-w-0 flex-col justify-center rounded-md border border-white/15 bg-[#202827]/90 px-3 py-3 text-right sm:px-5 sm:py-4 lg:order-3 lg:min-w-44">
             <p className="text-[10px] uppercase tracking-[0.18em] text-[#9a9d9d]">Current time</p>
             <p className="mt-1 whitespace-nowrap text-2xl font-semibold sm:text-4xl"><BoardClock /></p>
+            {startTime ? (
+              <p className="mt-1 whitespace-nowrap text-xs font-medium text-[#d8dad7] sm:text-sm">
+                Start {formatTimeOfDay(startTime)}
+              </p>
+            ) : null}
           </section>
         </header>
 

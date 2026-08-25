@@ -26,6 +26,7 @@ import {
   logoutAction,
   updateHeightOfCutAction,
   updatePlanAction,
+  updateStartTimeAction,
 } from "@/lib/actions";
 import type { DashboardData } from "@/lib/data";
 import {
@@ -326,6 +327,30 @@ function DayOverview({ assignedCount, data }: { assignedCount: number; data: Das
       <p className="mt-3 text-lg font-semibold">
         {assignedCount} of {data.employees.length} active employees have a job posted.
       </p>
+      <div className="mt-5 border-t border-white/10 pt-4">
+        <form action={updateStartTimeAction} className="flex items-end gap-2">
+          <input name="date" type="hidden" value={data.date} />
+          <label className="min-w-0 flex-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#9a9d9d]">
+            Start time
+            <input
+              className="input mt-2 h-10 normal-case tracking-normal text-[#f4f1eb]"
+              defaultValue={data.plan.startTime ?? ""}
+              key={`${data.date}:${data.plan.startTime ?? ""}`}
+              name="startTime"
+              step="60"
+              type="time"
+            />
+          </label>
+          <SubmitButton className="shrink-0" pendingText="Saving time">Save</SubmitButton>
+        </form>
+        <p className="mt-2 text-xs leading-5 text-[#9a9d9d]">
+          {data.startTimeInherited
+            ? "Using the most recent previous start time."
+            : data.plan.startTime
+              ? "Saved for this work day."
+              : "No previous start time is available."}
+        </p>
+      </div>
       <div className="mt-5 border-t border-white/10 pt-4">
         <p className="text-xs uppercase tracking-[0.18em] text-[#9a9d9d]">Still unassigned</p>
         <p className="mt-2 text-sm leading-6 text-[#d8dad7]">
