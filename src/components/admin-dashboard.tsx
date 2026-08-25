@@ -204,17 +204,17 @@ function HeightOfCut({ data }: { data: DashboardData }) {
         <div className="grid divide-y divide-white/10 lg:grid-cols-3 lg:divide-x lg:divide-y-0">
           <CutHeightGroup title="Greens">
             <CutHeightField
-              defaultValue={data.plan.greensWalkHeight?.toFixed(3) ?? ""}
+              defaultValue={data.plan.greensWalkHeight ?? ""}
               label="Walk"
               name="greensWalkHeight"
             />
             <CutHeightField
-              defaultValue={data.plan.greensTriplexHeight?.toFixed(3) ?? ""}
+              defaultValue={data.plan.greensTriplexHeight ?? ""}
               label="Triplex"
               name="greensTriplexHeight"
             />
             <CutHeightField
-              defaultValue={data.plan.greensCleanupHeight?.toFixed(3) ?? ""}
+              defaultValue={data.plan.greensCleanupHeight ?? ""}
               label="Cleanup"
               name="greensCleanupHeight"
             />
@@ -222,12 +222,12 @@ function HeightOfCut({ data }: { data: DashboardData }) {
 
           <CutHeightGroup title="TCA">
             <CutHeightField
-              defaultValue={data.plan.tcaTeesHeight?.toFixed(3) ?? ""}
+              defaultValue={data.plan.tcaTeesHeight ?? ""}
               label="Tees"
               name="tcaTeesHeight"
             />
             <CutHeightField
-              defaultValue={data.plan.tcaCollarsApproachesFairwaysHeight?.toFixed(3) ?? ""}
+              defaultValue={data.plan.tcaCollarsApproachesFairwaysHeight ?? ""}
               label="Collars / approaches / fairways"
               name="tcaCollarsApproachesFairwaysHeight"
             />
@@ -235,12 +235,12 @@ function HeightOfCut({ data }: { data: DashboardData }) {
 
           <CutHeightGroup title="Rough">
             <CutHeightField
-              defaultValue={data.plan.roughHeight?.toFixed(3) ?? ""}
+              defaultValue={data.plan.roughHeight ?? ""}
               label="Rough"
               name="roughHeight"
             />
             <CutHeightField
-              defaultValue={data.plan.roughSecondaryCutHeight?.toFixed(3) ?? ""}
+              defaultValue={data.plan.roughSecondaryCutHeight ?? ""}
               label="Secondary cut"
               name="roughSecondaryCutHeight"
             />
@@ -248,7 +248,7 @@ function HeightOfCut({ data }: { data: DashboardData }) {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#9a9d9d]">Use whole inches or decimals up to three places. Blank daily fields inherit available defaults.</p>
+          <p className="text-xs text-[#9a9d9d]">Entered decimal places and trailing zeros are preserved. Blank daily fields inherit available defaults.</p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <SubmitButton
               className="shrink-0"
@@ -303,10 +303,10 @@ function CutHeightField({
           defaultValue={defaultValue}
           inputMode="decimal"
           max="12"
-          min="0.001"
+          min="0"
           name={name}
           placeholder="0.000"
-          step="0.001"
+          step="any"
           type="number"
         />
         <span aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-[#9a9d9d]">

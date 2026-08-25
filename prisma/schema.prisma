@@ -35,13 +35,13 @@ model DailyPlan {
   date                               String       @unique
   notes                              String?
   weather                            String?
-  greensWalkHeight                   Decimal?     @db.Decimal(5, 3)
-  greensTriplexHeight                Decimal?     @db.Decimal(5, 3)
-  greensCleanupHeight                Decimal?     @db.Decimal(5, 3)
-  tcaTeesHeight                      Decimal?     @db.Decimal(5, 3)
-  tcaCollarsApproachesFairwaysHeight Decimal?     @db.Decimal(5, 3)
-  roughHeight                        Decimal?     @db.Decimal(5, 3)
-  roughSecondaryCutHeight            Decimal?     @db.Decimal(5, 3)
+  greensWalkHeight                   String?
+  greensTriplexHeight                String?
+  greensCleanupHeight                String?
+  tcaTeesHeight                      String?
+  tcaCollarsApproachesFairwaysHeight String?
+  roughHeight                        String?
+  roughSecondaryCutHeight            String?
   assignments                        Assignment[]
   createdAt                          DateTime     @default(now())
   updatedAt                          DateTime     @updatedAt
@@ -49,13 +49,13 @@ model DailyPlan {
 
 model HeightOfCutDefault {
   id                                 String   @id @default("default")
-  greensWalkHeight                   Decimal? @db.Decimal(5, 3)
-  greensTriplexHeight                Decimal? @db.Decimal(5, 3)
-  greensCleanupHeight                Decimal? @db.Decimal(5, 3)
-  tcaTeesHeight                      Decimal? @db.Decimal(5, 3)
-  tcaCollarsApproachesFairwaysHeight Decimal? @db.Decimal(5, 3)
-  roughHeight                        Decimal? @db.Decimal(5, 3)
-  roughSecondaryCutHeight            Decimal? @db.Decimal(5, 3)
+  greensWalkHeight                   String?
+  greensTriplexHeight                String?
+  greensCleanupHeight                String?
+  tcaTeesHeight                      String?
+  tcaCollarsApproachesFairwaysHeight String?
+  roughHeight                        String?
+  roughSecondaryCutHeight            String?
   createdAt                          DateTime @default(now())
   updatedAt                          DateTime @updatedAt
 }

@@ -1,6 +1,5 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -31,15 +30,16 @@ const adminAccountSchema = z.object({
 const optionalCutHeightSchema = z
   .string()
   .trim()
+  .max(32, "Enter a shorter cutting height.")
   .refine(
     (value) => {
       if (!value) return true;
-      if (!/^(?:\d+(?:\.\d{1,3})?|\.\d{1,3})$/.test(value)) return false;
+      if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(value)) return false;
 
       const height = Number(value);
-      return height >= 0.001 && height <= 12;
+      return Number.isFinite(height) && height > 0 && height <= 12;
     },
-    "Enter a height from 0.001 to 12 inches using no more than three decimal places.",
+    "Enter a height greater than 0 and no more than 12 inches.",
   )
   .transform((value) => value || null);
 
@@ -63,9 +63,9 @@ const emptyHeightOfCut = {
   roughSecondaryCutHeight: null,
 };
 
-function dailyHeightOverride(value: string | null, defaultValue: Prisma.Decimal | null | undefined) {
+function dailyHeightOverride(value: string | null, defaultValue: string | null | undefined) {
   if (!value || !defaultValue) return value;
-  return new Prisma.Decimal(value).equals(defaultValue) ? null : value;
+  return value === defaultValue ? null : value;
 }
 
 function text(formData: FormData, key: string) {
