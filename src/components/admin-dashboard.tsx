@@ -277,7 +277,7 @@ function HeightOfCut({ data }: { data: DashboardData }) {
 
 function CutHeightGroup({ children, title }: { children: React.ReactNode; title: string }) {
   return (
-    <fieldset className="min-w-0 px-5 py-4">
+    <fieldset className="min-w-0 px-5 pb-4 pt-6">
       <legend className="text-sm font-semibold text-[#f4f1eb]">{title}</legend>
       <div className="mt-3 grid gap-3">{children}</div>
     </fieldset>
