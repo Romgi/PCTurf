@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -51,6 +52,21 @@ const heightOfCutSchema = z.object({
   roughHeight: optionalCutHeightSchema,
   roughSecondaryCutHeight: optionalCutHeightSchema,
 });
+
+const emptyHeightOfCut = {
+  greensWalkHeight: null,
+  greensTriplexHeight: null,
+  greensCleanupHeight: null,
+  tcaTeesHeight: null,
+  tcaCollarsApproachesFairwaysHeight: null,
+  roughHeight: null,
+  roughSecondaryCutHeight: null,
+};
+
+function dailyHeightOverride(value: string | null, defaultValue: Prisma.Decimal | null | undefined) {
+  if (!value || !defaultValue) return value;
+  return new Prisma.Decimal(value).equals(defaultValue) ? null : value;
+}
 
 function text(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -122,6 +138,7 @@ export async function updatePlanAction(formData: FormData) {
 export async function updateHeightOfCutAction(formData: FormData) {
   await requireAdmin();
   const date = normalizeDateKey(text(formData, "date"));
+  const intent = text(formData, "heightIntent");
   const result = heightOfCutSchema.safeParse({
     greensWalkHeight: text(formData, "greensWalkHeight"),
     greensTriplexHeight: text(formData, "greensTriplexHeight"),
@@ -138,9 +155,42 @@ export async function updateHeightOfCutAction(formData: FormData) {
 
   const plan = await ensureDailyPlan(date);
 
+  if (intent === "default") {
+    await prisma.$transaction([
+      prisma.heightOfCutDefault.upsert({
+        where: { id: "default" },
+        update: result.data,
+        create: { id: "default", ...result.data },
+      }),
+      prisma.dailyPlan.update({
+        where: { id: plan.id },
+        data: emptyHeightOfCut,
+      }),
+    ]);
+
+    revalidateBoards();
+    return;
+  }
+
+  const defaults = await prisma.heightOfCutDefault.findUnique({ where: { id: "default" } });
+
   await prisma.dailyPlan.update({
     where: { id: plan.id },
-    data: result.data,
+    data: {
+      greensWalkHeight: dailyHeightOverride(result.data.greensWalkHeight, defaults?.greensWalkHeight),
+      greensTriplexHeight: dailyHeightOverride(result.data.greensTriplexHeight, defaults?.greensTriplexHeight),
+      greensCleanupHeight: dailyHeightOverride(result.data.greensCleanupHeight, defaults?.greensCleanupHeight),
+      tcaTeesHeight: dailyHeightOverride(result.data.tcaTeesHeight, defaults?.tcaTeesHeight),
+      tcaCollarsApproachesFairwaysHeight: dailyHeightOverride(
+        result.data.tcaCollarsApproachesFairwaysHeight,
+        defaults?.tcaCollarsApproachesFairwaysHeight,
+      ),
+      roughHeight: dailyHeightOverride(result.data.roughHeight, defaults?.roughHeight),
+      roughSecondaryCutHeight: dailyHeightOverride(
+        result.data.roughSecondaryCutHeight,
+        defaults?.roughSecondaryCutHeight,
+      ),
+    },
   });
 
   revalidateBoards();
@@ -402,6 +452,7 @@ export async function clearAllDataAction(formData: FormData) {
     prisma.assignment.deleteMany(),
     prisma.employee.deleteMany(),
     prisma.dailyPlan.deleteMany(),
+    prisma.heightOfCutDefault.deleteMany(),
     prisma.adminUser.deleteMany({ where: { id: { not: currentAdmin.id } } }),
   ]);
 

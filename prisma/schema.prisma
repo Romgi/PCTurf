@@ -47,6 +47,19 @@ model DailyPlan {
   updatedAt                          DateTime     @updatedAt
 }
 
+model HeightOfCutDefault {
+  id                                 String   @id @default("default")
+  greensWalkHeight                   Decimal? @db.Decimal(5, 3)
+  greensTriplexHeight                Decimal? @db.Decimal(5, 3)
+  greensCleanupHeight                Decimal? @db.Decimal(5, 3)
+  tcaTeesHeight                      Decimal? @db.Decimal(5, 3)
+  tcaCollarsApproachesFairwaysHeight Decimal? @db.Decimal(5, 3)
+  roughHeight                        Decimal? @db.Decimal(5, 3)
+  roughSecondaryCutHeight            Decimal? @db.Decimal(5, 3)
+  createdAt                          DateTime @default(now())
+  updatedAt                          DateTime @updatedAt
+}
+
 model Assignment {
   id         String    @id @default(cuid())
   planId     String

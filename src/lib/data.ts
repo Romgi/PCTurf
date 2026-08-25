@@ -18,7 +18,7 @@ export async function getBoardData(dateInput?: string | null) {
   const date = normalizeDateKey(dateInput);
   const plan = await ensureDailyPlan(date);
 
-  const [employees, assignments, weatherReport] = await Promise.all([
+  const [employees, assignments, weatherReport, heightDefaults] = await Promise.all([
     prisma.employee.findMany({
       where: { active: true },
       orderBy: [{ displayOrder: "asc" }, { name: "asc" }],
@@ -29,6 +29,7 @@ export async function getBoardData(dateInput?: string | null) {
       orderBy: [{ employee: { displayOrder: "asc" } }, { employee: { name: "asc" } }],
     }),
     getPortCarlingWeather(date),
+    prisma.heightOfCutDefault.findUnique({ where: { id: "default" } }),
   ]);
 
   const assignmentsByEmployee = new Map(
@@ -38,10 +39,24 @@ export async function getBoardData(dateInput?: string | null) {
     employee,
     assignment: assignmentsByEmployee.get(employee.id) ?? null,
   }));
+  const effectivePlan = {
+    ...plan,
+    greensWalkHeight: plan.greensWalkHeight ?? heightDefaults?.greensWalkHeight ?? null,
+    greensTriplexHeight: plan.greensTriplexHeight ?? heightDefaults?.greensTriplexHeight ?? null,
+    greensCleanupHeight: plan.greensCleanupHeight ?? heightDefaults?.greensCleanupHeight ?? null,
+    tcaTeesHeight: plan.tcaTeesHeight ?? heightDefaults?.tcaTeesHeight ?? null,
+    tcaCollarsApproachesFairwaysHeight:
+      plan.tcaCollarsApproachesFairwaysHeight
+      ?? heightDefaults?.tcaCollarsApproachesFairwaysHeight
+      ?? null,
+    roughHeight: plan.roughHeight ?? heightDefaults?.roughHeight ?? null,
+    roughSecondaryCutHeight:
+      plan.roughSecondaryCutHeight ?? heightDefaults?.roughSecondaryCutHeight ?? null,
+  };
 
   return {
     date,
-    plan,
+    plan: effectivePlan,
     assignments,
     employees,
     employeeAssignments,

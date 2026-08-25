@@ -194,7 +194,9 @@ function HeightOfCut({ data }: { data: DashboardData }) {
           <Ruler className="h-4 w-4" />
           Height of Cut
         </p>
-        <p className="mt-2 text-sm text-[#d8dad7]">Cutting heights for the selected work day, measured in inches.</p>
+        <p className="mt-2 text-sm text-[#d8dad7]">
+          Defaults automatically fill each work day until different values are saved for that date.
+        </p>
       </div>
 
       <form action={updateHeightOfCutAction}>
@@ -246,8 +248,27 @@ function HeightOfCut({ data }: { data: DashboardData }) {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-white/10 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#9a9d9d]">Use whole inches or decimals up to three places. Leave a field blank to clear it.</p>
-          <SubmitButton className="shrink-0" pendingText="Saving heights">Save heights</SubmitButton>
+          <p className="text-xs text-[#9a9d9d]">Use whole inches or decimals up to three places. Blank daily fields inherit available defaults.</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <SubmitButton
+              className="shrink-0"
+              confirmMessage="Use these cutting heights as the default for work days?"
+              name="heightIntent"
+              pendingText="Setting default"
+              value="default"
+              variant="secondary"
+            >
+              Set as default
+            </SubmitButton>
+            <SubmitButton
+              className="shrink-0"
+              name="heightIntent"
+              pendingText="Saving heights"
+              value="save"
+            >
+              Save for this day
+            </SubmitButton>
+          </div>
         </div>
       </form>
     </section>
@@ -434,7 +455,7 @@ function SystemAdministration({ currentAdminId, data }: { currentAdminId: string
             />
             <ResetControl
               action={clearAllDataAction}
-              description="Deletes employees, assignments, dates, notes, legacy job data, and all additional administrators. Your current login is preserved to prevent lockout."
+              description="Deletes employees, assignments, dates, notes, cutting height defaults, legacy job data, and all additional administrators. Your current login is preserved to prevent lockout."
               phrase="CLEAR ALL DATA"
               title="Clear all data"
             />
