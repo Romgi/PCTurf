@@ -116,7 +116,12 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
                     {employee.title ? <p className="mt-0.5 break-words text-[10px] leading-tight text-[#9a9d9d] lg:truncate">{employee.title}</p> : null}
                   </div>
                   <div className="flex min-w-0 items-center px-2.5 py-1">
-                    <p className={cn("break-words font-sans text-[15px] font-normal leading-tight lg:truncate", !assignment && "text-[#9a9d9d]")}>
+                    <p
+                      className={cn(
+                        "break-words font-sans text-[15px] font-normal leading-tight lg:truncate",
+                        (!assignment || assignment.title.trim().toLocaleLowerCase() === "absent") && "text-[#9a9d9d]",
+                      )}
+                    >
                       {assignment?.title || "Unassigned"}
                     </p>
                   </div>
