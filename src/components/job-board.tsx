@@ -37,7 +37,7 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
   );
 
   return (
-    <main className="flex min-h-dvh flex-col overflow-x-hidden overflow-y-auto bg-[#333e3d] px-3 py-3 text-[#f4f1eb] sm:px-4 lg:h-dvh lg:min-h-0 lg:overflow-hidden lg:px-7 lg:py-5">
+    <main className="flex min-h-dvh flex-col overflow-x-hidden overflow-y-auto bg-[#333e3d] px-3 py-3 text-[#f4f1eb] sm:px-4 lg:h-dvh lg:min-h-0 lg:overflow-hidden lg:px-[max(2.5rem,3vw)] lg:py-[max(2rem,3vh)]">
       <header className="flex shrink-0 flex-col gap-2 border-b border-white/12 pb-2 lg:flex-row lg:items-start lg:justify-between lg:gap-4">
         <BrandLockup />
         <div className="flex w-full flex-wrap items-center justify-between gap-2 text-left lg:w-auto lg:flex-nowrap lg:items-start lg:justify-end lg:gap-3 lg:text-right">
