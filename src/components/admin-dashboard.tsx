@@ -103,27 +103,28 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
       </section>
 
       <div className="mx-auto mt-5 grid max-w-[1680px] items-start gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(310px,0.65fr)]">
-        <div className="grid gap-5">
-          <WeatherOverview data={data} />
-          <HeightOfCut data={data} />
-          <DirectionOfCut
-            date={data.date}
-            initialDirections={{
-              greensCutDirection: data.plan.greensCutDirection,
-              approachesCutDirection: data.plan.approachesCutDirection,
-              teesCutDirection: data.plan.teesCutDirection,
-              fairwaysCutDirection: data.plan.fairwaysCutDirection,
-            }}
-            key={[
-              data.date,
-              data.plan.greensCutDirection,
-              data.plan.approachesCutDirection,
-              data.plan.teesCutDirection,
-              data.plan.fairwaysCutDirection,
-            ].join(":")}
-          />
-        </div>
+        <WeatherOverview data={data} />
         <DayOverview assignedCount={assignedCount} data={data} />
+      </div>
+
+      <div className="mx-auto mt-5 grid max-w-[1680px] items-start gap-5 xl:grid-cols-2">
+        <HeightOfCut data={data} />
+        <DirectionOfCut
+          date={data.date}
+          initialDirections={{
+            greensCutDirection: data.plan.greensCutDirection,
+            approachesCutDirection: data.plan.approachesCutDirection,
+            teesCutDirection: data.plan.teesCutDirection,
+            fairwaysCutDirection: data.plan.fairwaysCutDirection,
+          }}
+          key={[
+            data.date,
+            data.plan.greensCutDirection,
+            data.plan.approachesCutDirection,
+            data.plan.teesCutDirection,
+            data.plan.fairwaysCutDirection,
+          ].join(":")}
+        />
       </div>
 
       <section className="mx-auto mt-5 max-w-[1680px]">
