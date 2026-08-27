@@ -35,7 +35,6 @@ type Employee = {
   displayOrder: number;
   id: string;
   name: string;
-  title: string | null;
 };
 
 function SortableEmployee({
@@ -77,22 +76,17 @@ function SortableEmployee({
         <summary className="flex list-none items-center justify-between gap-4 px-4 py-3">
           <span className="min-w-0">
             <span className="block truncate font-semibold">{employee.name}</span>
-            {employee.title ? <span className="mt-0.5 block truncate text-xs text-[#9a9d9d]">{employee.title}</span> : null}
           </span>
           <span className={cn("text-xs font-semibold uppercase tracking-[0.14em]", employee.active ? "text-[#d8dad7]" : "text-[#9a9d9d]")}>
             {employee.active ? "Active" : "Inactive"}
           </span>
         </summary>
         <div className="border-t border-white/10 p-4">
-          <form action={updateEmployeeAction} className="grid gap-3 md:grid-cols-[1.2fr_1fr_auto] md:items-end">
+          <form action={updateEmployeeAction} className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
             <input name="id" type="hidden" value={employee.id} />
             <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#9a9d9d]">
               Name
               <input className="input normal-case tracking-normal" defaultValue={employee.name} name="name" required />
-            </label>
-            <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#9a9d9d]">
-              Title
-              <input className="input normal-case tracking-normal" defaultValue={employee.title ?? ""} name="title" />
             </label>
             <SubmitButton variant="secondary">Save</SubmitButton>
           </form>
@@ -161,14 +155,10 @@ export function EmployeeManager({ initialEmployees }: { initialEmployees: Employ
         {isPending ? <p className="text-sm font-semibold text-[#d8dad7]">Saving order...</p> : null}
       </div>
 
-      <form action={createEmployeeAction} className="mt-5 grid gap-3 border-y border-white/10 py-5 md:grid-cols-[1.2fr_1fr_auto] md:items-end">
+      <form action={createEmployeeAction} className="mt-5 grid gap-3 border-y border-white/10 py-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
         <label className="grid gap-2 text-sm font-semibold">
           Name
           <input className="input" name="name" placeholder="Employee name" required />
-        </label>
-        <label className="grid gap-2 text-sm font-semibold">
-          Title
-          <input className="input" name="title" placeholder="(optional)" />
         </label>
         <SubmitButton className="gap-2">
           <Plus className="h-4 w-4" />

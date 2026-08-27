@@ -343,7 +343,6 @@ export async function createEmployeeAction(formData: FormData) {
   await prisma.employee.create({
     data: {
       name,
-      title: optionalText(formData, "title"),
       displayOrder: (lastEmployee._max.displayOrder ?? -1) + 1,
     },
   });
@@ -362,10 +361,7 @@ export async function updateEmployeeAction(formData: FormData) {
 
   await prisma.employee.update({
     where: { id },
-    data: {
-      name,
-      title: optionalText(formData, "title"),
-    },
+    data: { name },
   });
 
   revalidateBoards();

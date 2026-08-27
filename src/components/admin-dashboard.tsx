@@ -158,10 +158,9 @@ export function AdminDashboard({ admin, data }: AdminDashboardProps) {
           displayOrder: employee.displayOrder,
           id: employee.id,
           name: employee.name,
-          title: employee.title,
         }))}
         key={data.allEmployees
-          .map((employee) => `${employee.id}:${employee.displayOrder}:${employee.active}:${employee.name}:${employee.title ?? ""}`)
+          .map((employee) => `${employee.id}:${employee.displayOrder}:${employee.active}:${employee.name}`)
           .join("|")}
       />
       <SystemAdministration currentAdminId={admin.id} data={data} />

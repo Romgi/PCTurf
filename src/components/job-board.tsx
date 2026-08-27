@@ -113,7 +113,6 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
                 >
                   <div className="flex min-w-0 flex-col justify-center border-r border-white/10 px-2.5 py-1">
                     <h2 className="break-words text-[25px] font-semibold leading-tight lg:truncate">{employee.name}</h2>
-                    {employee.title ? <p className="mt-0.5 break-words text-[10px] leading-tight text-[#9a9d9d] lg:truncate">{employee.title}</p> : null}
                   </div>
                   <div className="flex min-w-0 items-center px-2.5 py-1">
                     <p

@@ -36,7 +36,7 @@ function timestamp(value, field) {
 
 async function importData() {
   const admins = rows("AdminUser", ["id", "name", "email", "passwordHash", "createdAt", "updatedAt"]);
-  const employees = rows("TurfEmployee", ["id", "name", "title", "active", "displayOrder", "createdAt", "updatedAt"]);
+  const employees = rows("TurfEmployee", ["id", "name", "active", "displayOrder", "createdAt", "updatedAt"]);
   const plans = rows("DailyPlan", ["id", "date", "notes", "weather", "createdAt", "updatedAt"]);
   const assignments = rows("JobAssignment", ["id", "planId", "employeeId", "title", "createdAt", "updatedAt"]);
   const planIds = new Map();
@@ -65,7 +65,6 @@ async function importData() {
       where: { id: employee.id },
       update: {
         name: employee.name,
-        title: employee.title,
         active: Boolean(employee.active),
         displayOrder: Number(employee.displayOrder),
         updatedAt: timestamp(employee.updatedAt, "employee updatedAt"),
@@ -73,7 +72,6 @@ async function importData() {
       create: {
         id: employee.id,
         name: employee.name,
-        title: employee.title,
         active: Boolean(employee.active),
         displayOrder: Number(employee.displayOrder),
         createdAt: timestamp(employee.createdAt, "employee createdAt"),

@@ -19,7 +19,6 @@ model AdminUser {
 model Employee {
   id           String       @id @default(cuid())
   name         String
-  title        String?
   active       Boolean      @default(true)
   displayOrder Int          @default(0)
   assignments  Assignment[]

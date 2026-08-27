@@ -11,7 +11,6 @@ type AssignmentRow = {
   employee: {
     id: string;
     name: string;
-    title: string | null;
   };
   assignmentTitle: string;
   commonJobs: string[];
@@ -152,7 +151,6 @@ export function AssignmentRoster({ allSuggestions, date, rows }: AssignmentRoste
             <input name="employeeId" type="hidden" value={row.employee.id} />
             <div className="min-w-0">
               <p className="truncate font-semibold text-[#f4f1eb]">{row.employee.name}</p>
-              {row.employee.title ? <p className="mt-0.5 truncate text-xs text-[#9a9d9d]">{row.employee.title}</p> : null}
             </div>
             <AssignmentInput
               allSuggestions={allSuggestions}

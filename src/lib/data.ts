@@ -151,7 +151,6 @@ export async function getDashboardData(dateInput?: string | null) {
       employee: {
         id: employee.id,
         name: employee.name,
-        title: employee.title,
       },
       assignmentTitle: assignment?.title ?? "",
       commonJobs: rankJobs(jobsByEmployee.get(employee.id) ?? new Map(), 5),
