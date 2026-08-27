@@ -3,8 +3,10 @@ import { ArrowLeft } from "lucide-react";
 
 import { BoardClock } from "@/components/board-clock";
 import { BrandLockup } from "@/components/brand-lockup";
+import { CutDirectionIndicator } from "@/components/cut-direction-indicator";
 import { FullscreenButton } from "@/components/fullscreen-button";
 import { WeatherIcon } from "@/components/weather-icon";
+import { CUT_DIRECTION_AREAS, getCutDirectionLabel, isCutDirection } from "@/lib/cut-directions";
 import type { BoardData } from "@/lib/data";
 import { formatDisplayDate, formatTimeOfDay } from "@/lib/dates";
 import { cn } from "@/lib/ui";
@@ -94,46 +96,76 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
         </div>
       </section>
 
-      {totalEmployees > 0 ? (
-        <section
-          className={cn("grid flex-none grid-cols-1 gap-1.5 lg:min-h-0 lg:flex-1", boardColumnClass)}
-        >
-          {employeeColumns.map((employeeColumn, columnIndex) => (
-            <div
-              className="grid auto-rows-auto gap-px overflow-visible rounded border border-white/12 bg-white/10 lg:min-h-0 lg:auto-rows-fr lg:overflow-hidden"
-              key={columnIndex}
-            >
-              {employeeColumn.map(({ entry: { employee, assignment }, index }) => (
-                <article
-                  className={cn(
-                    "grid min-h-12 grid-cols-[minmax(0,42%)_minmax(0,1fr)] overflow-visible lg:min-h-0 lg:grid-cols-[minmax(130px,34%)_minmax(0,1fr)] lg:overflow-hidden",
-                    index % 2 === 0 ? "bg-[#293231]" : "bg-[#303938]",
-                  )}
-                  key={employee.id}
-                >
-                  <div className="flex min-w-0 flex-col justify-center border-r border-white/10 px-2.5 py-1">
-                    <h2 className="break-words text-[25px] font-semibold leading-tight lg:truncate">{employee.name}</h2>
-                  </div>
-                  <div className="flex min-w-0 items-center px-2.5 py-1">
-                    <p
-                      className={cn(
-                        "break-words font-sans text-[25px] font-normal leading-tight lg:truncate",
-                        (!assignment || assignment.title.trim().toLocaleLowerCase() === "absent") && "text-[#9a9d9d]",
-                      )}
-                    >
-                      {assignment?.title || "Unassigned"}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          ))}
-        </section>
-      ) : (
-        <section className="flex min-h-0 flex-1 items-center justify-center rounded-md border border-dashed border-white/15 text-[#9a9d9d]">
-          No active employees are listed.
-        </section>
-      )}
+      <div className="grid flex-none grid-cols-1 gap-1.5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_220px] xl:grid-cols-[minmax(0,1fr)_250px]">
+        {totalEmployees > 0 ? (
+          <section className={cn("grid grid-cols-1 gap-1.5 lg:min-h-0", boardColumnClass)}>
+            {employeeColumns.map((employeeColumn, columnIndex) => (
+              <div
+                className="grid auto-rows-auto gap-px overflow-visible rounded border border-white/12 bg-white/10 lg:min-h-0 lg:auto-rows-fr lg:overflow-hidden"
+                key={columnIndex}
+              >
+                {employeeColumn.map(({ entry: { employee, assignment }, index }) => (
+                  <article
+                    className={cn(
+                      "grid min-h-12 grid-cols-[minmax(0,42%)_minmax(0,1fr)] overflow-visible lg:min-h-0 lg:grid-cols-[minmax(130px,34%)_minmax(0,1fr)] lg:overflow-hidden",
+                      index % 2 === 0 ? "bg-[#293231]" : "bg-[#303938]",
+                    )}
+                    key={employee.id}
+                  >
+                    <div className="flex min-w-0 flex-col justify-center border-r border-white/10 px-2.5 py-1">
+                      <h2 className="break-words text-[25px] font-semibold leading-tight lg:truncate">{employee.name}</h2>
+                    </div>
+                    <div className="flex min-w-0 items-center px-2.5 py-1">
+                      <p
+                        className={cn(
+                          "break-words font-sans text-[25px] font-normal leading-tight lg:truncate",
+                          (!assignment || assignment.title.trim().toLocaleLowerCase() === "absent") && "text-[#9a9d9d]",
+                        )}
+                      >
+                        {assignment?.title || "Unassigned"}
+                      </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ))}
+          </section>
+        ) : (
+          <section className="flex min-h-40 items-center justify-center rounded-md border border-dashed border-white/15 text-[#9a9d9d] lg:min-h-0">
+            No active employees are listed.
+          </section>
+        )}
+
+        <aside aria-label="Direction of cut" className="grid grid-cols-2 gap-1.5 lg:min-h-0 lg:grid-cols-1 lg:grid-rows-4">
+          {CUT_DIRECTION_AREAS.map((area, index) => {
+            const savedDirection = data.plan[area.key];
+            const direction = isCutDirection(savedDirection) ? savedDirection : "";
+
+            return (
+              <div
+                className={cn(
+                  "flex min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded border border-white/12 px-1.5 py-2 text-center sm:flex-row sm:gap-3 sm:px-3 sm:text-left lg:gap-2 lg:px-2 xl:gap-3 xl:px-3",
+                  index % 2 === 0 ? "bg-[#293231]" : "bg-[#303938]",
+                )}
+                key={area.key}
+              >
+                <CutDirectionIndicator
+                  area={area.label}
+                  className="h-20 w-20 lg:h-[min(9vh,92px)] lg:w-[min(9vh,92px)] xl:h-24 xl:w-24"
+                  direction={direction}
+                  id={`board-${area.key}`}
+                />
+                <div className="min-w-0">
+                  <h2 className="text-sm font-semibold text-[#f4f1eb] xl:text-base">{area.label}</h2>
+                  <p className="mt-0.5 text-xs font-medium text-[#9a9d9d] xl:text-sm">
+                    {direction ? getCutDirectionLabel(direction) : "Not set"}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </aside>
+      </div>
     </main>
   );
 }
