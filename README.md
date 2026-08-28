@@ -36,7 +36,7 @@ The administrator password must be at least 12 characters and contain uppercase,
 
 The deployed app uses PostgreSQL through Prisma. Daily plans are keyed by `YYYY-MM-DD`, so bosses can schedule future work and review past days without manually creating new day records.
 
-Each employee has one free-text assignment per day. Focusing an assignment field shows that employee's most common jobs, while typing searches previous jobs across the whole crew. `Absent` is available in the same autocomplete list and can be extended with a reason when needed.
+Each employee has one free-text assignment per day. Focusing an assignment field shows that employee's most common jobs, while typing searches previous jobs across the whole crew. `Off` is available in the same autocomplete list and is muted on the presentation board.
 
 ## Vercel Deployment
 

@@ -49,8 +49,8 @@ function AssignmentInput({
 
     if (!isFiltering || !query) {
       const initial = row.commonJobs.length > 0
-        ? [...row.commonJobs, "Absent"]
-        : ["Absent", ...allSuggestions];
+        ? [...row.commonJobs, "Off"]
+        : ["Off", ...allSuggestions];
       return uniqueSuggestions(initial).slice(0, 6);
     }
 

@@ -16,6 +16,18 @@ type JobBoardProps = {
   showFullscreen?: boolean;
 };
 
+function isMutedAssignment(title?: string) {
+  if (!title) return true;
+
+  const normalizedTitle = title.trim().toLocaleLowerCase();
+  return normalizedTitle === "off" || normalizedTitle === "absent";
+}
+
+function getAssignmentDisplayTitle(title?: string) {
+  if (!title) return "Unassigned";
+  return title.trim().toLocaleLowerCase() === "absent" ? "Off" : title;
+}
+
 export function JobBoard({
   data,
   showFullscreen = false,
@@ -119,10 +131,10 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
                       <p
                         className={cn(
                           "break-words font-sans text-[25px] font-normal leading-tight lg:truncate",
-                          (!assignment || assignment.title.trim().toLocaleLowerCase() === "absent") && "text-[#9a9d9d]",
+                          isMutedAssignment(assignment?.title) && "text-[#9a9d9d]",
                         )}
                       >
-                        {assignment?.title || "Unassigned"}
+                        {getAssignmentDisplayTitle(assignment?.title)}
                       </p>
                     </div>
                   </article>

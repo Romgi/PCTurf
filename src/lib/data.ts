@@ -136,10 +136,10 @@ export async function getDashboardData(dateInput?: string | null) {
     jobsByEmployee.set(assignment.employeeId, employeeJobs);
   }
 
-  const allSuggestions = rankJobs(globalJobs);
-  if (!allSuggestions.some((suggestion) => suggestion.toLocaleLowerCase() === "absent")) {
-    allSuggestions.unshift("Absent");
-  }
+  const allSuggestions = rankJobs(globalJobs).filter(
+    (suggestion) => !["absent", "off"].includes(suggestion.toLocaleLowerCase()),
+  );
+  allSuggestions.unshift("Off");
 
   return {
     ...board,
@@ -152,8 +152,13 @@ export async function getDashboardData(dateInput?: string | null) {
         id: employee.id,
         name: employee.name,
       },
-      assignmentTitle: assignment?.title ?? "",
-      commonJobs: rankJobs(jobsByEmployee.get(employee.id) ?? new Map(), 5),
+      assignmentTitle:
+        assignment?.title.trim().toLocaleLowerCase() === "absent"
+          ? "Off"
+          : (assignment?.title ?? ""),
+      commonJobs: rankJobs(jobsByEmployee.get(employee.id) ?? new Map())
+        .filter((suggestion) => !["absent", "off"].includes(suggestion.toLocaleLowerCase()))
+        .slice(0, 5),
     })),
   };
 }
