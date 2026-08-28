@@ -201,7 +201,7 @@ Administrator-entered course and weather notes are stored separately from the ex
 
 Presentation images are loaded from `public/slides` at server render time. Supported extensions are `.avif`, `.jpeg`, `.jpg`, `.png`, and `.webp`.
 
-Files are sorted by filename using numeric-aware ordering. Add, remove, or replace files in `public/slides`, commit the changes, and redeploy. With one image the lobby remains on that image; with multiple images it advances every 30 seconds.
+Files are discovered using numeric-aware filename ordering and shuffled once whenever the presentation lobby opens. That randomized sequence remains stable while the slideshow loops, and multiple images advance every 30 seconds. Add, remove, or replace files in `public/slides`, commit the changes, and redeploy.
 
 ## Administrator Accounts
 
