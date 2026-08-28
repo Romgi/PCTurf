@@ -96,7 +96,7 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
         </div>
       </section>
 
-      <div className="grid flex-none grid-cols-1 gap-1.5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_220px] xl:grid-cols-[minmax(0,1fr)_250px]">
+      <div className="grid flex-none grid-cols-1 gap-1.5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_240px] xl:grid-cols-[minmax(0,1fr)_270px] 2xl:grid-cols-[minmax(0,1fr)_300px]">
         {totalEmployees > 0 ? (
           <section className={cn("grid grid-cols-1 gap-1.5 lg:min-h-0", boardColumnClass)}>
             {employeeColumns.map((employeeColumn, columnIndex) => (
@@ -144,20 +144,20 @@ function PresentBoard({ data, showFullscreen }: { data: BoardData; showFullscree
             return (
               <div
                 className={cn(
-                  "flex min-w-0 flex-col items-center justify-center gap-1 overflow-hidden rounded border border-white/12 px-1.5 py-2 text-center sm:flex-row sm:gap-3 sm:px-3 sm:text-left lg:gap-2 lg:px-2 xl:gap-3 xl:px-3",
+                  "flex min-w-0 flex-col items-center justify-center gap-2 overflow-hidden rounded border border-white/12 px-1.5 py-2 text-center sm:flex-row sm:gap-3 sm:px-3 sm:text-left lg:gap-2 lg:px-2 xl:gap-4 xl:px-3 2xl:gap-5 2xl:px-4",
                   index % 2 === 0 ? "bg-[#293231]" : "bg-[#303938]",
                 )}
                 key={area.key}
               >
                 <CutDirectionIndicator
                   area={area.label}
-                  className="h-20 w-20 lg:h-[min(9vh,92px)] lg:w-[min(9vh,92px)] xl:h-24 xl:w-24"
+                  className="h-24 w-24 lg:h-[min(11vh,104px)] lg:w-[min(11vh,104px)] xl:h-28 xl:w-28 2xl:h-32 2xl:w-32"
                   direction={direction}
                   id={`board-${area.key}`}
                 />
                 <div className="min-w-0">
-                  <h2 className="text-sm font-semibold text-[#f4f1eb] xl:text-base">{area.label}</h2>
-                  <p className="mt-0.5 text-xs font-medium text-[#9a9d9d] xl:text-sm">
+                  <h2 className="text-base font-semibold text-[#f4f1eb] xl:text-lg 2xl:text-xl">{area.label}</h2>
+                  <p className="mt-0.5 text-sm font-medium text-[#9a9d9d] xl:text-base 2xl:text-lg">
                     {direction ? getCutDirectionLabel(direction) : "Not set"}
                   </p>
                 </div>
